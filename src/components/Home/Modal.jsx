@@ -104,7 +104,7 @@ function StyledTreeItem(props) {
 
 
 
-function Modal({ isOpen, handleNewClose, mode, action, resetChangesTrigger, formDataEdit }) {
+function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit }) {
     const [open, setOpen] = React.useState(false);
     const [warning, setWarning] = useState(false);
     const [message, setMessage] = useState("");

@@ -1,5 +1,5 @@
 import { Box, Button, Checkbox, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TableSortLabel, TextField, Toolbar, Typography } from '@mui/material'
-import React from 'react'
+import React, { useEffect } from 'react'
 import PropTypes from "prop-types";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -76,14 +76,14 @@ function EnhancedTableHead(props) {
                     }}
                     padding="checkbox"
                 >
-                    <Checkbox
+                    {/* <Checkbox
                         color="default"
                         checked={rowCount > 0 && numSelected === rowCount}
                         onChange={onSelectAllClick}
                         inputProps={{
                             "aria-label": "select all desserts",
                         }}
-                    />
+                    /> */}
                 </TableCell>
                 {rows.map((header, index) => {
                     if (
@@ -138,8 +138,8 @@ EnhancedTableHead.propTypes = {
     rowCount: PropTypes.number.isRequired,
 };
 
-function EnhancedTableToolbar(props) {
-    const { name } = props;
+function EnhancedTableToolbar({ searchTerm, handleSearch }) {
+    // const { name,searchTerm,handleSearch } = props;
     return (
         <Toolbar
             sx={{
@@ -154,6 +154,13 @@ function EnhancedTableToolbar(props) {
             >
                 Profile
             </Typography>
+            <input
+                placeholder="Search"
+                value={searchTerm}
+                className="attendanceTableSearch"
+                onChange={handleSearch}
+                variant="outlined"
+            />
         </Toolbar>
     )
 }
@@ -181,6 +188,9 @@ function Summary() {
     const [newOpen, setnewOpen] = React.useState(false); //new modal
     const [mode, setMode] = React.useState("new");
     const [changesTriggered, setchangesTriggered] = React.useState(false);
+    const [searchTerm, setSearchTerm] = React.useState("");
+    const [filteredRows, setFilteredRows] = React.useState([]);
+    const [searchKey, setsearchKey] = React.useState("");
 
 
     const buttonStyle = {
@@ -219,7 +229,7 @@ function Summary() {
     React.useEffect(() => {
         fetchData(); // Initial data fetch
         setPage(0);
-    }, [token, changesTriggered]);
+    }, [token, changesTriggered, searchKey]);
 
 
     const handleRequestSort = (event, property) => {
@@ -230,7 +240,7 @@ function Summary() {
 
     const handleSelectAllClick = (event) => {
         if (event.target.checked) {
-            const newSelected = data.map((n) => n.iTransId);
+            const newSelected = visibleRows.map((n) => n.iTransId);
             setSelected(newSelected);
             return;
         }
@@ -265,18 +275,37 @@ function Summary() {
 
     const isSelected = (id) => selected.indexOf(id) !== -1;
 
-    // Avoid a layout jump when reaching the last page with empty rows.
-    const filteredRows = data.filter((row) =>
-        Object.values(row).some((value) => {
-            if (typeof value === "string") {
-                return value.toLowerCase();
-            }
-            if (typeof value === "number") {
-                return value.toString();
-            }
-            return false; // Ignore other types
-        })
-    );
+    const transformData = (rows) => {
+        return rows.map((row) => {
+            const transformedRow = { ...row };
+            Object.keys(row).forEach((key) => {
+                if (!isNaN(row[key]) && key !== "id") {
+                    // assuming 'id' should not be converted
+                    transformedRow[key] = Number(row[key]);
+                }
+            });
+            return transformedRow;
+        });
+    };
+
+    useEffect(() => {
+        if (searchTerm) {
+            const filteredData = data.filter((row) =>
+        Object.values(row).some((val) =>
+          typeof val === "string" || typeof val === "number"
+            ? val.toString().toLowerCase().includes(searchTerm.toLowerCase())
+            : false
+        )
+      );
+            const transformedRows = transformData(filteredData);
+            setFilteredRows(filteredData);
+        } else {
+            const transformedRows = transformData(data);
+            setFilteredRows(data);
+        }
+    }, [searchTerm, data])
+
+
     const visibleRows = React.useMemo(
         () =>
             stableSort(filteredRows, getComparator(order, orderBy)).slice(
@@ -286,8 +315,9 @@ function Summary() {
         [order, orderBy, page, rowsPerPage, filteredRows]
     );
 
+
     const handleEdit = () => {
-        
+
         setEdit(selected.join())
         handleOpenModal()
         setnewOpen(true);
@@ -311,8 +341,8 @@ function Summary() {
     }
     const handleNewClose = () => {
         setnewOpen(false);
-        setchangesTriggered(true);
         setSelected([])
+        setchangesTriggered(true);
     };
 
     const resetChangesTrigger = () => {
@@ -344,13 +374,24 @@ function Summary() {
                 // User clicked "No" or outside the modal
                 Swal.fire('Cancelled', 'The profile was not deleted.', 'info');
             }
+            setchangesTriggered(true);
         } catch (error) {
             console.log("delete", error);
             // Add error message here if needed
             Swal.fire('Error', 'Failed to delete the profile.', 'error');
+            setchangesTriggered(true);
         }
 
     }
+    const handleSearchKeyChange = (newSearchKey) => {
+        setsearchKey(newSearchKey);
+    }
+    const handleSearch = (event) => {
+        setSearchTerm(event.target.value);
+        setPage(0);
+        // props.onDisplayStartChange(0);
+        handleSearchKeyChange(event.target.value);
+    };
     return (
         <>
             <Box
@@ -425,7 +466,10 @@ function Summary() {
                                 <EnhancedTableToolbar
 
                                     numSelected={selected.length} // Provide the numSelected prop
+                                    searchTerm={searchTerm}
+                                    handleSearch={handleSearch}
                                 />
+
 
                                 {data.length > 0 && (
                                     <TableContainer
@@ -456,7 +500,7 @@ function Summary() {
                                             />
 
                                             <TableBody>
-                                                {visibleRows.map((row, index) => {
+                                                {filteredRows.map((row, index) => {
                                                     const isItemSelected = isSelected(row.iProfileId);
                                                     const labelId = `enhanced-table-checkbox-${index}`;
                                                     const handleRowDoubleClick = async (event, iProfileId) => {
@@ -602,7 +646,6 @@ function Summary() {
                         handleNewClose={handleNewClose}
                         mode={mode}
                         action={handleSubmit}
-                        iProfilId={selected}
                         formDataEdit={
                             mode === "edit" ? selected[0] : 0
                         }
