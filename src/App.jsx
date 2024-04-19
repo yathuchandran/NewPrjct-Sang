@@ -3,7 +3,6 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import RoutesPath from './routes/RoutePath'
 
 function App() {
-  console.log("hello appp");
   return (
     <Fragment>   
     <BrowserRouter>

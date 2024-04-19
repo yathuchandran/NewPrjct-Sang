@@ -5,7 +5,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { useLocation, useNavigate } from "react-router-dom";
-import { DeleteProfile, GetProfileSummary } from '../../api/Api';
+import { DeleteProfile, DeleteRole, GetProfileSummary, GetRoleSummary } from '../../api/Api';
 import { CheckBox, TextFields } from '@mui/icons-material';
 import Modal from './Modal';
 import Swal from "sweetalert2";
@@ -58,6 +58,7 @@ function EnhancedTableHead(props) {
     const createSortHandler = (property) => (event) => {
         onRequestSort(event, property);
     };
+
     return (
         <TableHead
             style={{
@@ -87,9 +88,9 @@ function EnhancedTableHead(props) {
                     /> */}
                 </TableCell>
                 {rows.map((header, index) => {
-    if (header !== "iProfileId") {
+    if (header !== "iRoleId") {
         const displayName =
-            header === "sProfileName" ? "ProfileName" :
+            header === "sRoleName" ? "Role Name" :
             header === "iCreatedBy" ? "CreatedBy" :
             header === "iModifiedBy" ? "ModifiedBy" :
             header === "iCreatedDate" ? "CreatedDate" :
@@ -153,7 +154,7 @@ function EnhancedTableToolbar({ searchTerm, handleSearch }) {
                 id="tableTitle"
                 component="div"
             >
-                Profile
+                Role
             </Typography>
             <input
                 placeholder="Search"
@@ -220,7 +221,7 @@ const navigate=useNavigate()
     const fetchData = async () => {
         handleOpen();
         setSelected([]);
-        const response = await GetProfileSummary();
+        const response = await GetRoleSummary();
         if (response?.status === "Success") {
             const myObject = JSON.parse(response?.result);
             setData(myObject);
@@ -251,6 +252,7 @@ const navigate=useNavigate()
         setSelected([]);
     };
     const handleClick = (event, id) => {
+
         const selectedIndex = selected.indexOf(id);
         let newSelected = [];
 
@@ -356,30 +358,32 @@ const navigate=useNavigate()
 
     const handleDelete = async () => {
         const data12 = selected.join(',');
-
+     
         try {
             const shouldDelete = await Swal.fire({
                 title: 'Are you sure?',
-                text: "You are about to delete .",
+                text: "You won't be able to revert this!.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, delete it!',
                 cancelButtonText: 'No, cancel it'
             });
+
             if (shouldDelete.isConfirmed) {
-                const res = await DeleteProfile({ profileId: data12 });
+                const res = await DeleteRole({ roleId: data12 });
                 // Add success message here if needed
-                Swal.fire('Deleted!', 'The profile has been deleted.', 'success');
+                Swal.fire('Deleted!', 'The Role has been deleted.', 'success');
             } 
             setchangesTriggered(true);
         } catch (error) {
-            console.log("delete----------", error);
+            console.log("delete", error);
             // Add error message here if needed
-            Swal.fire('Error', `${error.message}`, 'error');
+            Swal.fire('Error', 'Failed to delete the Role.', 'error');
             setchangesTriggered(true);
         }
 
     }
+
 
     const handleSearchKeyChange = (newSearchKey) => {
         setsearchKey(newSearchKey);
@@ -387,6 +391,7 @@ const navigate=useNavigate()
     const handleSearch = (event) => {
         setSearchTerm(event.target.value);
         setPage(0);
+        // props.onDisplayStartChange(0);
         handleSearchKeyChange(event.target.value);
     };
     return (
@@ -395,6 +400,7 @@ const navigate=useNavigate()
             <Box
                 sx={{
                     margin: 0,
+                    marginTop:0,
                     background: `primary`,
                     height: "200px",
                     boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.5)",
@@ -406,8 +412,9 @@ const navigate=useNavigate()
                         paddingRight: 2,
                         paddingBottom: 5,
                         zIndex: 1,
-                        minHeight: "590px",
+                        minHeight: "200px",
                         height: "100px",
+
 
                     }}
                 >
@@ -501,11 +508,11 @@ const navigate=useNavigate()
 
                                             <TableBody>
                                                 {filteredRows.map((row, index) => {
-                                                    const isItemSelected = isSelected(row.iProfileId);
+                                                    const isItemSelected = isSelected(row.iRoleId);
                                                     const labelId = `enhanced-table-checkbox-${index}`;
-                                                    const handleRowDoubleClick = async (event, iProfileId) => {
+                                                    const handleRowDoubleClick = async (event, iRoleId) => {
                                                         handleOpen();
-                                                        setSelected([iProfileId]);
+                                                        setSelected([iRoleId]);
                                                         handleOpenModal()
                                                         handleClose();
                                                         setEdit(selected.join())
@@ -518,15 +525,15 @@ const navigate=useNavigate()
                                                             hover
                                                             className={`table-row `}
                                                             onClick={(event) =>
-                                                                handleClick(event, row.iProfileId)
+                                                                handleClick(event, row.iRoleId)
                                                             }
                                                             onDoubleClick={(event) =>
-                                                                handleRowDoubleClick(event, row.iProfileId)
+                                                                handleRowDoubleClick(event, row.iRoleId)
                                                             }
                                                             role="checkbox"
                                                             aria-checked={isItemSelected}
                                                             tabIndex={-1}
-                                                            key={row.iProfileId}
+                                                            key={row.iRoleId}
                                                             selected={isItemSelected}
                                                             sx={{ cursor: "pointer" }}
                                                         >
@@ -541,7 +548,7 @@ const navigate=useNavigate()
                                                             </TableCell>
                                                             {Object.keys(data[0]).map((column, index) => {
                                                                 if (
-                                                                    column !== "iProfileId" 
+                                                                    column !== "iRoleId" 
                                                                 ) {
                                                                     return (
                                                                         <>

@@ -15,6 +15,7 @@ function Header() {
   const navigate = useNavigate();
   const refreshToken = localStorage.getItem("refreshToken");
   const accessToken = localStorage.getItem("accessToken");
+  const LoginName = localStorage.getItem("sLoginName");
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -118,7 +119,15 @@ function Header() {
     navigate("/");
   };
 
-
+const handleProfile=()=>{
+  navigate("/Profile")
+}
+const handleRole=()=>{
+  navigate('/Role')
+}
+const handleUser=()=>{
+  navigate('/User')
+}
   return (
     <>
       <AppBar position="static"
@@ -133,8 +142,8 @@ function Header() {
           <Toolbar disableGutters>
             <Avatar
               alt="Logo"
-              src="http://103.120.178.195:82/Sang_solutions/assets/images/sang_logo.png"
-              sx={{ mr: 2, width: 60, height: 60 }}
+              src="https://th.bing.com/th/id/R.c2be529c2bc2661ca5470f03543f471b?rik=OirVRGPaFpau5A&riu=http%3a%2f%2fsangsolutions.com%2fimg%2fsangsolution.png&ehk=jkxPYwdZRZ%2fZwko9wuAvL%2bVMA2GEhTg%2fmHUvUIKFGzE%3d&risl=&pid=ImgRaw&r=0"
+              sx={{ mr: 2, width: 45, height: 45 }}
             />
 
             <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
@@ -177,7 +186,50 @@ function Header() {
                 justifyContent: "start",
               }}
             >
-              {menu &&
+              <Box sx={{
+            flexGrow: 1, display: { xs: 'none', md: 'flex' }, alignItems: 'center',
+            justifyContent: 'start',
+          }}>
+
+<Button
+              variant="#00498E"
+              sx={{
+                mr: 0,
+                backgroundColor: secondaryColorTheme,
+                color: 'white',
+              }}
+              onClick={handleProfile}
+            >
+              PROFILE
+            </Button>
+            <Button
+              variant="#00498E"
+              sx={{
+                mr: 0,
+                backgroundColor: secondaryColorTheme,
+                color: 'white',
+              }}
+              onClick={handleRole}
+
+            >
+              ROLE
+            </Button>
+            <Button
+              variant="#0583D2"
+              sx={{
+                mr: 0,
+                backgroundColor: secondaryColorTheme,
+                color: 'white',
+              }}
+              onClick={handleUser}
+            >
+              USER
+            </Button>
+            
+          </Box>
+             
+
+              {/* {menu &&
                 menu
                   .filter((menuList) => menuList.iParentId === 0)
                   .map((menuList, index) => (
@@ -195,9 +247,9 @@ function Header() {
                     >
                       {menuList.sName}
                     </Button>
-                  ))}
+                  ))} */}
 
-              <Menu
+              {/* <Menu
                 id="master-menu"
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
@@ -214,7 +266,7 @@ function Header() {
                         {menuList.sName}
                       </MenuItem>
                     ))}
-              </Menu>
+              </Menu> */}
             </Box>
             <Box sx={{ flexGrow: 0 }}>
               <SettingsIcon sx={{ marginRight: "20px" }} />
@@ -236,7 +288,7 @@ function Header() {
               <Tooltip title="Open settings">
                 <IconButton sx={{ p: 0 }}>
                   <Stack direction="row" spacing={2}>
-                    <Avatar>Admin</Avatar>
+                    <Avatar>{LoginName}</Avatar>
                   </Stack>
                 </IconButton>
               </Tooltip>

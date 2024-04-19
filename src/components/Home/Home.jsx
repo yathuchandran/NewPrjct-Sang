@@ -6,11 +6,10 @@ import Summary from './Summary';
 // import Main from '../DashBoard/Main'
 
 export default function Home() {
-    console.log("hello home");
   return (
    <>
    <Header/>
-<Summary/>
+{/* <Summary/> */}
    </>
   )
 }

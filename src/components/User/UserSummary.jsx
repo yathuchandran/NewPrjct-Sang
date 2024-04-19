@@ -5,14 +5,15 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { useLocation, useNavigate } from "react-router-dom";
-import { DeleteProfile, GetProfileSummary } from '../../api/Api';
+import {   DeleteUser,   GetUserSummary } from '../../api/Api';
 import { CheckBox, TextFields } from '@mui/icons-material';
-import Modal from './Modal';
+// import Modal from './Modal';
 import Swal from "sweetalert2";
 import CloseIcon from "@mui/icons-material/Close";
 import Header from '../Header/Header';
 import Loader from '../Loader/Loader';
 import { visuallyHidden } from "@mui/utils";
+import Modal from './modal';
 
 
 function descendingComparator(a, b, orderBy) {
@@ -58,6 +59,7 @@ function EnhancedTableHead(props) {
     const createSortHandler = (property) => (event) => {
         onRequestSort(event, property);
     };
+
     return (
         <TableHead
             style={{
@@ -87,13 +89,14 @@ function EnhancedTableHead(props) {
                     /> */}
                 </TableCell>
                 {rows.map((header, index) => {
-    if (header !== "iProfileId") {
+    if (header !== "iId") {
         const displayName =
-            header === "sProfileName" ? "ProfileName" :
-            header === "iCreatedBy" ? "CreatedBy" :
-            header === "iModifiedBy" ? "ModifiedBy" :
-            header === "iCreatedDate" ? "CreatedDate" :
-            header === "iModifiedDate" ? "ModifiedDate" :
+            header === "sLoginName" ? " Name" :
+            header === "sRoleName" ? " Role" :
+            header === "iCreatedBy" ? "Created By" :
+            header === "iModifiedBy" ? "Modified By" :
+            header === "iCreatedDate" ? "Created On" :
+            header === "iModifiedDate" ? "Modified On" :
             header; // Use the header itself if it doesn't match the conditions
 
         return (
@@ -153,7 +156,7 @@ function EnhancedTableToolbar({ searchTerm, handleSearch }) {
                 id="tableTitle"
                 component="div"
             >
-                Profile
+                User
             </Typography>
             <input
                 placeholder="Search"
@@ -170,7 +173,7 @@ EnhancedTableToolbar.propTypes = {
 };
 
 
-function RoleSummary() {
+function UserSummary() {
     const token = Number(localStorage.getItem("accessToken"));
     const location = useLocation();
     const [order, setOrder] = React.useState("asc");
@@ -220,7 +223,7 @@ const navigate=useNavigate()
     const fetchData = async () => {
         handleOpen();
         setSelected([]);
-        const response = await GetProfileSummary();
+        const response = await GetUserSummary();
         if (response?.status === "Success") {
             const myObject = JSON.parse(response?.result);
             setData(myObject);
@@ -251,6 +254,7 @@ const navigate=useNavigate()
         setSelected([]);
     };
     const handleClick = (event, id) => {
+
         const selectedIndex = selected.indexOf(id);
         let newSelected = [];
 
@@ -355,31 +359,33 @@ const navigate=useNavigate()
     };
 
     const handleDelete = async () => {
-        const data12 = selected.join(',');
 
+        const data12 = selected.join(',');
         try {
             const shouldDelete = await Swal.fire({
                 title: 'Are you sure?',
-                text: "You are about to delete .",
+                text: 'You are about to delete.',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, delete it!',
                 cancelButtonText: 'No, cancel it'
             });
+
             if (shouldDelete.isConfirmed) {
-                const res = await DeleteProfile({ profileId: data12 });
+                const res = await DeleteUser({ userId: data12 });
                 // Add success message here if needed
-                Swal.fire('Deleted!', 'The profile has been deleted.', 'success');
+                Swal.fire('Deleted!', 'The User has been deleted.', 'success');
             } 
             setchangesTriggered(true);
         } catch (error) {
-            console.log("delete----------", error);
+            console.log("delete", error);
             // Add error message here if needed
-            Swal.fire('Error', `${error.message}`, 'error');
+            Swal.fire('Error', 'Failed to delete the User.', 'error');
             setchangesTriggered(true);
         }
 
     }
+
 
     const handleSearchKeyChange = (newSearchKey) => {
         setsearchKey(newSearchKey);
@@ -387,6 +393,7 @@ const navigate=useNavigate()
     const handleSearch = (event) => {
         setSearchTerm(event.target.value);
         setPage(0);
+        // props.onDisplayStartChange(0);
         handleSearchKeyChange(event.target.value);
     };
     return (
@@ -501,11 +508,11 @@ const navigate=useNavigate()
 
                                             <TableBody>
                                                 {filteredRows.map((row, index) => {
-                                                    const isItemSelected = isSelected(row.iProfileId);
+                                                    const isItemSelected = isSelected(row.iId);
                                                     const labelId = `enhanced-table-checkbox-${index}`;
-                                                    const handleRowDoubleClick = async (event, iProfileId) => {
+                                                    const handleRowDoubleClick = async (event, iId) => {
                                                         handleOpen();
-                                                        setSelected([iProfileId]);
+                                                        setSelected([iId]);
                                                         handleOpenModal()
                                                         handleClose();
                                                         setEdit(selected.join())
@@ -518,15 +525,15 @@ const navigate=useNavigate()
                                                             hover
                                                             className={`table-row `}
                                                             onClick={(event) =>
-                                                                handleClick(event, row.iProfileId)
+                                                                handleClick(event, row.iId)
                                                             }
                                                             onDoubleClick={(event) =>
-                                                                handleRowDoubleClick(event, row.iProfileId)
+                                                                handleRowDoubleClick(event, row.iId)
                                                             }
                                                             role="checkbox"
                                                             aria-checked={isItemSelected}
                                                             tabIndex={-1}
-                                                            key={row.iProfileId}
+                                                            key={row.iId}
                                                             selected={isItemSelected}
                                                             sx={{ cursor: "pointer" }}
                                                         >
@@ -541,7 +548,7 @@ const navigate=useNavigate()
                                                             </TableCell>
                                                             {Object.keys(data[0]).map((column, index) => {
                                                                 if (
-                                                                    column !== "iProfileId" 
+                                                                    column !== "iId" 
                                                                 ) {
                                                                     return (
                                                                         <>
@@ -657,4 +664,4 @@ const navigate=useNavigate()
     )
 }
 
-export default RoleSummary
+export default UserSummary

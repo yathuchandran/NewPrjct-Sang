@@ -5,7 +5,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
 import Loader from "../Loader/Loader";
-import { GetActions, GetMenuData, GetProfileDetails, UpsertProfile } from "../../api/Api";
+import { DeleteProfile, GetActions, GetMenuData, GetProfileDetails, UpsertProfile } from "../../api/Api";
 import MenuIcon from "@mui/icons-material/Menu";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { colourTheme, secondaryColorTheme } from "../../config";
@@ -43,12 +43,13 @@ const customFormGroupStyle1 = {
     overflowY: 'auto', // Hide vertical overflow
     overflowX: 'auto', // Allow horizontal scrolling
     padding: '10px',
-    width: '572px',
+    width: '100%',
+    height: '450px'
 
 };
 
 
-
+///TREE VIEW ITEMS----------------------------------------------------------------------------------------------------------------------
 function MinusSquare(props) {
     return (
         <SvgIcon fontSize="inherit" style={{ width: 14, height: 14 }} {...props}>
@@ -114,20 +115,8 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
     const [ActionButton, setActionButton] = React.useState([]);
     const [SelectActionButton, setSelectActionButton] = React.useState([]);
     const [menuId, setMenuId] = React.useState([]);
-    const [actions, setActions] = React.useState([]);
     const [mode1, setMode1] = useState("");
-    const [nameUpdate, setNameUpdate] = React.useState('')
-
-    console.log(formDataEdit, "formDataEdit");
-    const getInitialFormData = () => {
-        return {
-            profileId: 0,
-            profileName: "",
-            userId: 0,
-        }
-    };
-
-
+    const [ProfileId, setProfileId] = useState();
 
 
 
@@ -137,6 +126,8 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
 
     useEffect(() => {
         setMode1(mode);
+        setProfileId(formDataEdit)
+
     }, [mode]);
 
     useEffect(() => {
@@ -150,9 +141,6 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
             }
         }
         fetchData()
-
-
-
     }, [])
 
     useEffect(() => {
@@ -162,16 +150,28 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
                 const response = await GetProfileDetails({ profileId: profilId })
                 const data = JSON.parse(response.result)
                 const datas = data.Table.map((item) => item.sProfileName);
-
                 const datas1 = data.Table1.map((item) => item);
                 const datas2 = datas1.map((item) => (item.iMenuId));
                 if (datas1.length > 0) {
-                    const combinedId = datas1.map((actionItem) => `${actionItem.iMenuId}_${actionItem.iActionId}`).join(',');
-                    setSelectActionButton(combinedId.split(','));
-                    setMenuId(datas2[0])
-
+                    const combinedIdsMap = new Map(); // Use a map to group combinedIds by menuId
+                    datas1.forEach(actionItem => {
+                        const key = actionItem.iMenuId;
+                        const combinedId = `${actionItem.iMenuId}_${actionItem.iActionId}`;
+                        if (combinedIdsMap.has(key)) {
+                            combinedIdsMap.get(key).push(combinedId);
+                        } else {
+                            combinedIdsMap.set(key, [combinedId]);
+                        }
+                    });
+                
+                    const selectActionButton = Array.from(combinedIdsMap).map(([menuId, combinedIds]) => ({
+                        menuId: menuId,
+                        combinedIds: combinedIds
+                    }));
+                
+                    setSelectActionButton(selectActionButton);
+                    setMenuId(datas2[0]);
                 }
-                console.log(response);
                 setName(datas[0])
 
             } catch (error) {
@@ -183,8 +183,8 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
         }
     }, [])
 
-
-    const handleClickEvents = async (thirdMenu) => {
+    const handleClickEvents = async (thirdMenu,subMenu,menuList) => {
+      
         try {
             const response = await GetActions({
                 menuId: thirdMenu.iId
@@ -197,82 +197,51 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
         }
     };
 
+const ClickEvents= async (subMenu,menuList) => {
+    try {
+        const response = await GetActions({
+            menuId: subMenu.iId
+        })
+        const data = JSON.parse(response.result)
+        setActionButton(data)
+        setMenuId(subMenu.iId)
+    } catch (error) {
+        console.log("Get Actions ", error)
+    }
+}
 
+    // useEffect(()=>{
+    //     const dataArray = SelectActionButton.map(item => {
+    //         const [iMenu, iAction] = item.split('_');
+    //         return {
+    //             iMenu: parseInt(iMenu),
+    //             iAction: parseInt(iAction)
+    //         };
+    //     });
 
-    // const handleCloses = () => {
-    //     setMenuIds(null);
-    // };
-
-    // const handleMenuList = () => {
-    //     setAnchorEl(null);
-    //     setAnchorElNav(null); // This line will close the menu
-    //     setActiveSubMenuId(null);
-    // };
-
-    // const handleSubMenu = (event, Id) => {
-    //     if (Id === 25) {
-    //         navigate("/home");
-    //     } else {
-    //         setAnchorEl(event.currentTarget);
-    //         setMenuId(Id);
+    //     const data = {
+    //         profileId: formDataEdit,
+    //         profileName: name,
     //     }
-    // }
-
-    // const handleMobMenu = (id) => {
-    //     if (id === 25) {
-    //         navigate("/home");
-    //     } else {
-    //         setActiveSubMenuId(id);
-    //         console.log(id, "handleMobMenu,setActiveSubMenuId");
-
-    //     }
-    // };
-
-    // let menuItems
-
-    // if (activeSubMenuId == null) {
-    //     // Main menu items
-
-    //     menuItems = menu
-    //         .filter((menuList) => menuList.iParentId === 0)
-    //         .map((menuList) => (
-    //             <MenuItem
-    //                 key={menuList.iId}
-    //                 onClick={() => handleMobMenu(menuList.iId)}
-    //             >
-    //                 <Typography textAlign="center">{menuList.sName}</Typography>
-    //             </MenuItem>
-    //         ));
-    // } else {
-    //     // Sub-menu items
-    //     menuItems = [
-    //         <MenuItem key="back" onClick={() => setActiveSubMenuId(null)}>
-    //             <ArrowBackIcon sx={{ color: colourTheme }} />
-    //         </MenuItem>,
-    //         ...menu
-    //             .filter((menuList) => menuList.iParentId === activeSubMenuId)
-    //             .map((menuList) => (
-    //                 <MenuItem
-    //                     key={menuList.iId}
-    //                     onClick={() => handleClickEvent(menuList)}
-    //                 >
-    //                     <Typography textAlign="center">{menuList.sName}</Typography>
-    //                 </MenuItem>
-    //             )),
-    //     ];
-    // }
+    //     setBody(dataArray)
+    //     sethead(data)
+    // },[])
 
 
 
     const handleSaveAccount = async () => {
         if (mode1 === "edit") {
-            const dataArray = SelectActionButton.map(item => {
-                const [iMenu, iAction] = item.split('_');
-                return {
-                    iMenu: parseInt(iMenu),
-                    iAction: parseInt(iAction)
-                };
+            const dataArray = SelectActionButton.flatMap(item => {
+                const combinedIds = item.combinedIds;
+                return combinedIds.map(combinedId => {
+                    const [iMenu, iAction] = combinedId.split('_');
+                    return {
+                        iMenu: parseInt(iMenu),
+                        iAction: parseInt(iAction)
+                    };
+                });
             });
+            
             if (!dataArray.length > 0) {
                 Swal.fire({
                     title: "Error!",
@@ -320,7 +289,14 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
                 resetChangesTrigger()
                 handleNewClose()
             } catch (error) {
-                console.log("Get UpsertProfile ", error)
+                console.log("Get UpsertProfile ", error.response)
+                Swal.fire({
+                    title: "Error!",
+                    text: `${error.response.data.message}`,
+                    icon: "error",
+                    showConfirmButton: false,
+                    timer: 1500,
+                });
             }
         } else {
             if (!name) {
@@ -333,14 +309,20 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
                 });
                 return;
             }
-
-            const dataArray = SelectActionButton.map(item => {
-                const [iMenu, iAction] = item.split('_');
-                return {
-                    iMenu: parseInt(iMenu),
-                    iAction: parseInt(iAction)
-                };
+            const dataArray = SelectActionButton.flatMap(item => {
+                const combinedIds = item.combinedIds;
+                return combinedIds.map(combinedId => {
+                    const [iMenu, iAction] = combinedId.split('_');
+                    return {
+                        iMenu: parseInt(iMenu),
+                        iAction: parseInt(iAction)
+                    };
+                });
             });
+            
+            
+
+            
             if (!dataArray.length > 0) {
                 Swal.fire({
                     title: "Error!",
@@ -351,8 +333,9 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
                 });
                 return;
             }
+
             const data = {
-                profileId: formDataEdit,
+                profileId: ProfileId,
                 profileName: name,
             }
             try {
@@ -373,7 +356,15 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
                 resetChangesTrigger()
                 handleNewClose()
             } catch (error) {
-                console.log("Get UpsertProfile ", error)
+
+                console.log("Get UpsertProfile ", error.response.data.message)
+                Swal.fire({
+                    title: "Error!",
+                    text: `${error.response.data.message}`,
+                    icon: "error",
+                    showConfirmButton: false,
+                    timer: 1500,
+                });
             }
         }
 
@@ -402,36 +393,164 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
     };
     const newButtonClick = () => {
         setMode1("new");
-        getInitialFormData()
+        setName("")
+        setSelectActionButton("")
+        setProfileId(0)
+
     };
 
 
+
     const handleCheckboxChange = (iActionId) => {
-        const combinedId = `${menuId}_${iActionId}`
+        const combinedId = `${menuId}_${iActionId}`;
         setSelectActionButton((prevItems) => {
             if (Array.isArray(prevItems)) { // Check if prevItems is an array
-                if (prevItems.includes(combinedId)) {
-                    return prevItems.filter((id) => id !== combinedId); // Deselect if already selected
+                const existingIndex = prevItems.findIndex(item => item.menuId === menuId);
+
+                if (existingIndex !== -1) {
+                    // If menuId exists, update its combinedIds
+                    const updatedActionItem = {
+                        ...prevItems[existingIndex],
+                        combinedIds: prevItems[existingIndex].combinedIds.includes(combinedId) ?
+                            prevItems[existingIndex].combinedIds.filter(id => id !== combinedId) :
+                            [...prevItems[existingIndex].combinedIds, combinedId]
+                    };
+
+                    // Update SelectActionButton with the updated object
+                    const updatedSelectActionButton = [...prevItems];
+                    updatedSelectActionButton[existingIndex] = updatedActionItem;
+                    return updatedSelectActionButton;
                 } else {
-                    return [...prevItems, combinedId]; // Select if not selected
+                    // If menuId does not exist, add it to SelectActionButton
+                    const newSelectActionItem = {
+                        menuId: menuId,
+                        combinedIds: [combinedId]
+                    };
+
+                    // Update SelectActionButton with the new object
+                    return [...prevItems, newSelectActionItem];
                 }
             } else {
-                return [combinedId]; // If it's not an array, initialize with iId
+                // If it's not an array, initialize with newSelectActionItem
+                const newSelectActionItem = {
+                    menuId: menuId,
+                    combinedIds: [combinedId]
+                };
+                return [newSelectActionItem];
             }
         });
     };
 
 
+    // const handleCheckboxChange = (iActionId) => {
+    //     const combinedId = `${menuId}_${iActionId}`
+    //     setSelectActionButton((prevItems) => {
+    //         if (Array.isArray(prevItems)) { // Check if prevItems is an array
+    //             if (prevItems.includes(combinedId)) {
+    //                 return prevItems.filter((id) => id !== combinedId); // Deselect if already selected
+    //             } else {
+    //                 return [...prevItems, combinedId]; // Select if not selected
+    //             }
+    //         } else {
+    //             return [combinedId]; // If it's not an array, initialize with iId
+    //         }
+    //     });
+    // };
+
+    //     const handleSelectAll = () => {
+    //         const combinedId = ActionButton.map((actionItem) => `${menuId}_${actionItem.iActionId}`).join(',');
+    //         const combindeIdString=combinedId.split(',')
+    //         // setSelectActionButton(combinedId.split(','));
+    //         //  setSelectActionButton([...SelectActionButton, combindeIdString]);
+    //          setSelectAll(combindeIdString)
+    //          // To update the state:
+    //   setState({
+    //     ...state,
+    //     selectAll:combindeIdString,
+    //     selectActionButton: SelectActionButton
+    //   });
+    //     };
     const handleSelectAll = () => {
         const combinedId = ActionButton.map((actionItem) => `${menuId}_${actionItem.iActionId}`).join(',');
-        console.log(combinedId, "select all");
-        setSelectActionButton(combinedId.split(','));
+        const combinedIdArray = combinedId.split(',');
+
+        // Check if SelectActionButton already contains menuId
+        const existingIndex = SelectActionButton.findIndex(item => item.menuId === menuId);
+
+        if (existingIndex !== -1) {
+            // If menuId exists, update its combinedIds
+            const updatedActionItem = {
+                ...SelectActionButton[existingIndex],
+                combinedIds: combinedIdArray
+            };
+
+            // Update SelectActionButton with the updated object
+            const updatedSelectActionButton = [...SelectActionButton];
+            updatedSelectActionButton[existingIndex] = updatedActionItem;
+            setSelectActionButton(updatedSelectActionButton);
+        } else {
+            // If menuId does not exist, add it to SelectActionButton
+            const newSelectActionItem = {
+                menuId: menuId,
+                combinedIds: combinedIdArray
+            };
+
+            // Update SelectActionButton with the new object
+            setSelectActionButton([...SelectActionButton, newSelectActionItem]);
+        }
     };
+
 
     const handleUnselectAll = () => {
-        setSelectActionButton([])
+        const existingIndex = SelectActionButton.findIndex(item => item.menuId === menuId);
+    
+        if (existingIndex !== -1) {
+            // If menuId exists, remove its combinedIds
+            const updatedSelectActionButton = [...SelectActionButton];
+            updatedSelectActionButton[existingIndex].combinedIds = [];
+            setSelectActionButton(updatedSelectActionButton);
+        } 
     };
+    
 
+    const handleDelete = async () => {
+
+        try {
+            if (!formDataEdit) {
+                Swal.fire({
+                    title: "Error!",
+                    text: "choose data!!",
+                    icon: "error",
+                    showConfirmButton: false,
+                    timer: 1500,
+                });
+            } else {
+                const shouldDelete = await Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'No, cancel it!'
+                });
+
+                if (shouldDelete.isConfirmed) {
+                    const res = await DeleteProfile({ profileId: formDataEdit });
+                    // Add success message here if needed
+                    Swal.fire('Deleted!', 'The profile has been deleted.', 'success');
+                }
+            }
+            resetChangesTrigger()
+            handleNewClose()
+        } catch (error) {
+            console.log("delete", error);
+            // Add error message here if needed
+            Swal.fire('Error', 'Failed to delete the profile.', 'error');
+            resetChangesTrigger()
+            handleNewClose()
+        }
+
+    }
     return (
         <div><div
             className={`modal-backdrop fade ${isOpen ? "show" : ""}`}
@@ -445,7 +564,7 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
                     className={`modal ${isOpen ? "modal-open" : ""}`}
                     style={modalStyle}
                 >
-                    <div style={{ marginTop: "10%", width: "80%", marginLeft: "100px" }} >
+                    <div style={{ marginTop: "5%", width: "60%", marginLeft: "300px", height: "60%" }} >
                         <div className="modal-content">
                             <form>
                                 <Stack
@@ -471,7 +590,7 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
                                         Save
                                     </Button>
                                     <Button
-                                        // onClick={handleAllClear}
+                                        onClick={handleDelete}
                                         variant="contained"
                                         startIcon={<CloseIcon />}
                                         style={buttonStyle}
@@ -498,7 +617,7 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
                                     }}
                                 >
                                     <div className="attendanceNewContainer">
-                                        <MDBCol sx={{ width: "10px" }}>
+                                        <MDBCol >
                                             <MDBInput
                                                 required
                                                 value={name}
@@ -508,9 +627,6 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
                                                 onChange={(e) => setName(e.target.value)}
                                                 labelStyle={{
                                                     fontSize: "15px",
-                                                }}
-                                                style={{
-                                                    width: "200px", // Adjust the width as per your preference
                                                 }}
                                             />
 
@@ -546,6 +662,8 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
                                                                             key={subMenu.iId}
                                                                             nodeId={subMenu.iId.toString()}
                                                                             labelText={subMenu.sName}
+                                                                            onClick={() => ClickEvents(subMenu,menuList)}
+
                                                                         >
                                                                             {menu
                                                                                 .filter((thirdMenu) => thirdMenu.iParentId === subMenu.iId)
@@ -555,7 +673,7 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
                                                                                         nodeId={thirdMenu.iId.toString()}
                                                                                         labelText={thirdMenu.sName}
 
-                                                                                        onClick={() => handleClickEvents(thirdMenu)}
+                                                                                        onClick={() => handleClickEvents(thirdMenu,subMenu,menuList)}
                                                                                     />
                                                                                 ))}
                                                                         </StyledTreeItem>
@@ -569,13 +687,37 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
                                             </div>
 
                                             <div style={customFormGroupStyle1}>
-                                                <Box sx={{
-                                                    marginBottom: '20px',
-                                                    flexDirection: 'column'
-                                                }}>
-                                                    <Typography sx={{ fontSize: '16px', paddingBottom: '10px' }}>
-                                                        Action
-                                                    </Typography>
+                                                <Box>
+                                                    <Box sx={{ flexDirection: 'row', alignItems: 'center' }} style={{ display: 'flex' }}>
+                                                        <Typography sx={{ fontSize: '16px', }}>
+                                                            Action
+                                                        </Typography>
+                                                        {ActionButton.length > 0 ? (
+                                                            <Box sx={{ paddingLeft: '200px', flexDirection: 'column' }}>
+                                                                <FormControlLabel
+                                                                    control={<Checkbox
+                                                                        onChange={handleSelectAll}
+                                                                        checked={Array.isArray(SelectActionButton) &&
+                                                                            SelectActionButton.some(actionItem =>
+                                                                                actionItem.menuId === menuId &&
+                                                                                actionItem.combinedIds.length === ActionButton.length
+                                                                            )}
+                                                                        sx={{ height: "10px" }}
+                                                                    />}
+                                                                    label="Select All"
+                                                                />
+
+
+                                                                <FormControlLabel
+                                                                    control={<Checkbox onChange={handleUnselectAll}
+                                                                    checked={SelectActionButton.some(item => item.menuId === menuId && item.combinedIds.length === 0)}
+                                                                        sx={{ height: "10px" }} />}
+                                                                    label="Unselect All"
+                                                                />
+                                                            </Box>
+                                                        ) : null}
+
+                                                    </Box>
 
                                                     <Box sx={{ flexDirection: 'column', display: 'flex' }}>
                                                         {ActionButton.map((item) => (
@@ -583,30 +725,24 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
                                                                 key={item.iActionId}
                                                                 control={
                                                                     <Checkbox
-                                                                        checked={Array.isArray(SelectActionButton) && SelectActionButton.includes(`${menuId}_${item.iActionId}`)}
+                                                                        checked={Array.isArray(SelectActionButton) &&
+                                                                            SelectActionButton.some(actionItem =>
+                                                                                actionItem.menuId === menuId &&
+                                                                                actionItem.combinedIds.includes(`${menuId}_${item.iActionId}`)
+                                                                            )}
                                                                         onChange={() => handleCheckboxChange(item.iActionId)}
+                                                                        sx={{ height: "10px" }}
                                                                     />
                                                                 }
                                                                 label={item.sName}
                                                             />
                                                         ))}
                                                     </Box>
+
                                                 </Box>
 
 
-                                                <div>
-                                                    <FormControlLabel
-                                                        control={<Checkbox
-                                                            onChange={handleSelectAll}
-                                                            checked={SelectActionButton.length === ActionButton.length}
-                                                        />}
-                                                        label="Select All"
-                                                    />
-                                                    <FormControlLabel
-                                                        control={<Checkbox onChange={handleUnselectAll} />}
-                                                        label="Unselect All"
-                                                    />
-                                                </div>
+
                                             </div>
                                         </div>
 
@@ -621,10 +757,10 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
             </Zoom >
             <Loader open={open} handleClose={handleClose} />
             <ErrorMessage
-        open={warning}
-        handleClose={handleCloseAlert}
-        message={message}
-      />
+                open={warning}
+                handleClose={handleCloseAlert}
+                message={message}
+            />
         </div>
     )
 }

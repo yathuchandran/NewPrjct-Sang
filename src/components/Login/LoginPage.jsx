@@ -31,15 +31,14 @@ function LoginPage() {
   const [company, setCompany] = useState("");
   const [scompany, setScompany] = React.useState(false);
 
-  console.log(company.Company, "company");
 
   useEffect(() => {
     const fetchData = async () => {
       const response = await getLoginCompany()
-      console.log(response);
       if (response.statusCode === 200) {
         const myObject = JSON.parse(response.result);
         setSuggestionCompany(myObject);
+
       }
     };
     fetchData();
@@ -75,13 +74,11 @@ function LoginPage() {
           password: sPassword,
           database: company.Company,
         })
-        console.log(res.message, "login api response----------------------------------");
-        console.log(res);
         if (res.message == "Login successful") {
-          // localStorage.setItem("userId", res.data.iId);
-  
           localStorage.setItem("accessToken", res?.tokens?.accessToken);
           localStorage.setItem("refreshToken", res?.tokens?.refreshToken);
+          localStorage.setItem("sLoginName", JSON.stringify(sLoginName));
+
           navigate('/home')
         } else {
           setMessage(`${res.message}`)
@@ -189,7 +186,7 @@ function LoginPage() {
                   setCompany(newValue);
                 }}
                 options={suggestionCompany.map((data) => ({
-                  Company: data.sDatabase,
+                  Company: data.Company,
                   Id: data?.iId,
                 }))}
                 filterOptions={(options, { inputValue }) => {
