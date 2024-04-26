@@ -44,19 +44,50 @@ export default function EnhancedTable({ masteriId, setMasters, formDataEdit, mod
     const [loading, setLoading] = useState(false);
     const [MasterDatas, setMasterDatas] = useState([]);
 
-    useEffect(() => {
-        const endData = formData && formData.filter(row => row && (row.iMasterTypeId === masteriId || !row.iMasterTypeId)).map((row, index) => {
-            return row
-        })
-
-        console.log(endData, "endData");
-        setMasterDatas(endData)
-    }, [masteriId])
+    //     useEffect(() => {
+    //     const endData = Array.isArray(masterData) ? masterData.filter(row => row && (row.iMasterTypeId === masteriId )).map((row, index) => {
+    //         return row
+    //     })
+    
+    //     setMasterDatas(endData ||Array.from({ length: 30 }, () => ([])))
+    // }, [masteriId])
+    
 
     useEffect(() => {
 
         setMasters(formData)
-    }, [formData, masteriId])
+    }, [formData])
+
+console.log(Data,"Data===============================",masteriId);
+
+
+    useEffect(() => {
+        if (masterData.length === 0) {
+            const newRow = Array.from({ length: 30 }, () => ({
+                Master: false,
+                Report: false,
+                Transaction: false,
+                View: false,
+                TagName: "",
+                iTagId: 0,
+                iMasterTypeId:masteriId,
+            }));
+            setData(newRow);
+        } else {
+            const initialFormData = {};
+            masterData.forEach((data, index) => {
+                initialFormData[index] = { ...data };
+            });
+            setFormData(initialFormData);
+            setData(masterData);
+
+        }
+    }, [masteriId]);
+
+
+
+
+
 
     React.useEffect(() => {
         if (newState === true) {
@@ -87,7 +118,7 @@ export default function EnhancedTable({ masteriId, setMasters, formDataEdit, mod
                         iTagId: item.iTagId,
                         iMasterTypeId: item.iMasterTypeId
                     }));
-                    console.log(formattedData, "formattedData=====================================");
+
 
                     setData(formattedData);
                     setFormData(formattedData)
@@ -128,11 +159,11 @@ export default function EnhancedTable({ masteriId, setMasters, formDataEdit, mod
             iTagId: 0,
         };
         const newData = Array.isArray(Data) ? [...Data, newRow] : [newRow];
-        console.log(newData, "newData");
+
         setData(newData);
-        setFormData(newData)
 
     }
+
     const handleRowClick = (row) => {
         setSelectedRow(row);
         setAutocompleteOpen((prevState) => ({
@@ -173,7 +204,6 @@ export default function EnhancedTable({ masteriId, setMasters, formDataEdit, mod
         });
     };
 
-    console.log(formData, "oooooooooooooooooooooooooooooooooooooooooo");
     return (
         <Box sx={{ width: "95%", margin: "auto", marginTop: "30px" }}>
             <div
@@ -213,7 +243,10 @@ export default function EnhancedTable({ masteriId, setMasters, formDataEdit, mod
                                 </TableHead>
                                 {mode1 === "new" ? (
                                     <TableBody>
-                                        {Array.isArray(Data) && Data.map((row, index) => {
+                                        {Array.isArray(Data) &&(
+                                            Data.filter(row => row.iMasterTypeId === masteriId).length > 0 ? (
+                                                Data.filter(row => row.iMasterTypeId === masteriId).map((row, index) => {
+
                                             return (
                                                 <React.Fragment key={index}>
                                                     <TableRow
@@ -272,13 +305,21 @@ export default function EnhancedTable({ masteriId, setMasters, formDataEdit, mod
 
                                                 </React.Fragment>
                                             );
-                                        })}
+                                         })
+                                            ) : (
+                                                <TableRow>
+                                                    <TableCell colSpan={columns.length}>
+                                                        No data available.
+                                                    </TableCell>
+                                                </TableRow>
+                                            )
+                                        )}
                                     </TableBody>
                                 ) : (
                                     <TableBody>
-                                        {Array.isArray(formData) && (
-                                            formData.filter(row => row.iMasterTypeId === masteriId).length > 0 ? (
-                                                formData.filter(row => row.iMasterTypeId === masteriId).map((row, index) => {
+                                        {Array.isArray(Data) && (
+                                            Data.filter(row => row.iMasterTypeId === masteriId).length > 0 ? (
+                                                Data.filter(row => row.iMasterTypeId === masteriId).map((row, index) => {
                                                     return (
                                                         <React.Fragment key={index}>
                                                             <TableRow

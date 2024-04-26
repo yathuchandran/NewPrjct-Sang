@@ -12,7 +12,8 @@ import Loader from "../Loader/Loader";
 import { getLogin, getLoginCompany } from "../../api/Api";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import createTheme from "@mui/material/styles/createTheme";
-
+import LockIcon from '@mui/icons-material/Lock';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
 
 const defaultTheme = createTheme()
 
@@ -30,6 +31,7 @@ function LoginPage() {
   const [suggestionCompany, setSuggestionCompany] = useState([]);
   const [company, setCompany] = useState("");
   const [scompany, setScompany] = React.useState(false);
+  const [showPassword, setShowPassword] = useState(false); // State to manage password visibility
 
 
   useEffect(() => {
@@ -151,7 +153,7 @@ function LoginPage() {
               component="form"
               noValidate
               onSubmit={handleSubmit}
-              sx={{ marginTop: 1 }}
+              sx={{ marginTop: 1 ,width:"100%"}}
             >
               <TextField
                 error={email}
@@ -165,7 +167,7 @@ function LoginPage() {
                 helperText=""
                 autoFocus
               />
-              <TextField
+              {/* <TextField
                 error={password}
                 onChange={(e) => setSPassword(e.target.value)}
                 margin="normal"
@@ -177,7 +179,34 @@ function LoginPage() {
                 id="password"
                 autoComplete="current-password"
               // onKeyDown={handleKeyPress}
+              /> */}
+                  <div style={{ position: 'relative' }}>
+              <TextField
+                error={password}
+                onChange={(e) => setSPassword(e.target.value)}
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type={showPassword ? 'text' : 'password'} // Toggle type based on showPassword state
+                id="password"
+                autoComplete="current-password"
               />
+               <div
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{
+                          position: 'absolute',
+                          top: '50%',
+                          right: '10px',
+                          transform: 'translateY(-50%)',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {showPassword ? <LockOpenIcon /> : <LockIcon />}
+                      </div>
+                      </div>
+
               <Autocomplete
                 id={`size-small-filled-assetType`}
                 size="small"

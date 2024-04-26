@@ -18,7 +18,7 @@ function intersection(a, b) {
   return a.filter((value) => b.indexOf(value) !== -1);
 }
 
-export default  function AssignedProfile({roleId,setNewState,newState,setAssignedProfiles,setAssignedProfilesobj,setAssignedProfileLeftObj}) {
+export default  function AssignedProfile({roleId,setNewState,newState,setAssignedProfiles,setAssignedProfilesobj,AssignedProfilesObj,AssignedProfiles}) {
   const [checked, setChecked] = React.useState([]);
   const [left, setLeft] = React.useState([]);
   const [right, setRight] = React.useState([]);
@@ -41,17 +41,27 @@ const [profileId,setProfileId]=React.useState([]);
     }
 }, [newState]);
 
+React.useEffect(()=>{
+  setRight(AssignedProfiles)
 
-  // Update local storage whenever totalData or right changes
-  React.useEffect(() => {
-    localStorage.setItem('totalData', JSON.stringify(totalData));
-    localStorage.setItem('profileId', JSON.stringify(profileId));
+},[])
 
-  }, [totalData,profileId]);
 
-  React.useEffect(() => {
-    localStorage.setItem('right', JSON.stringify(right));
-  }, [right]);
+React.useEffect(()=>{
+  setAssignedProfiles(right)
+  setAssignedProfilesobj(totalData)
+  // setTotalData(...totalData,AssignedProfilesObj)
+},[right,totalData])
+
+
+
+// Update local storage whenever totalData or right changes
+React.useEffect(() => {
+  localStorage.setItem('totalData', JSON.stringify(totalData));
+  localStorage.setItem('profileId', JSON.stringify(profileId));
+}, [totalData,profileId]);
+
+
 
   React.useEffect(() => {
     if (Array.isArray(totalData)) {
@@ -73,6 +83,24 @@ const [profileId,setProfileId]=React.useState([]);
 }, [right, totalData]);
 
 
+// React.useEffect(() => {
+//   console.log("allProfiles Names:"); // Changed log message for clarity
+
+//   if (Array.isArray(totalData) && Array.isArray(profileId)) { // Check if profileId is an array
+//     const allProfiles = totalData.map((item) => item.iProfileId);
+//     console.log("allProfiles Names:", allProfiles); 
+
+//     if (profileId.every((profile) => allProfiles.includes(profile))) {
+//       const matchingProfiles = totalData.filter((item) => profileId.includes(item.iProfileId));
+//       console.log("matchingProfiles Names:", matchingProfiles); // Changed log message for clarity
+
+//       const matchingIds = matchingProfiles.map((item) => item.sProfileName);
+//       const profileNames = matchingIds.join(', '); // Changed variable name to profileNames for clarity
+//       console.log("Profile Names:", profileNames); // Changed log message for clarity
+//       setRight(profileNames)
+//     }
+//   }
+// }, []); // Added dependencies to useEffect
 
   React.useEffect(()=>{
     const GetRoleProfiless = async () => {
@@ -121,6 +149,7 @@ const [profileId,setProfileId]=React.useState([]);
   };
 
   const handleAllRight = () => {
+    const vv=right.concat(left)
     setRight(right.concat(left));
     setLeft([]);
   };
@@ -146,7 +175,7 @@ const [profileId,setProfileId]=React.useState([]);
   const customList = (items) => (
     <Paper sx={{ width: 400, height: 230, overflow: 'auto' }}>
       <List dense component="div" role="list">
-        {items.map((value) => {
+        {items && items.map((value) => {
           // const labelId = `transfer-list-item-${value}-label`;
           const labelId=value
           return (

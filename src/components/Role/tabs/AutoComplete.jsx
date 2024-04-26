@@ -4,14 +4,12 @@ import { GetMasterData, GetMasters } from "../../../api/Api";
 
 export default function AutoComplete3({
     value,
-    apiName,
-    onChangeDes,
+   
     onChangeName,
     masterId,
     key,
     formData,
     setFormData,
-    TagName
 }) {
     const CustomListBox = React.forwardRef((props, ref) => {
         const { children, ...other } = props;
@@ -48,14 +46,11 @@ export default function AutoComplete3({
 
 
 
-
-
-
     useEffect(() => {
         const fetchData = async () => {
             handleOpen();
             const encodedSearchkey = encodeURIComponent(searchkey);
-            if (encodedSearchkey) {
+           
               const data = {
                 masterId: masterId,
                 searchCondition: encodedSearchkey,
@@ -66,15 +61,11 @@ export default function AutoComplete3({
             if (response?.status === "Success") {
                 const myObject = JSON.parse(response?.result);
                 setSuggestion(myObject);
-            } else {
+            } else if (response?.status === "Failure") {
                 setSuggestion([]);
             }
-            
             handleClose();
-            }else{
-              console.log("no data here");
-            }
-           
+            
            
         };
         fetchData();

@@ -10,26 +10,13 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { colourTheme, secondaryColorTheme } from "../../config";
 
-import { TreeView, TreeItem } from '@mui/x-tree-view';
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import FolderIcon from "@mui/icons-material/Folder";
-// import { makeStyles } from "@material-ui/core";
-import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-// import { createTheme, ThemeProvider } from "@mui/material/styles";
-import DescriptionIcon from '@mui/icons-material/Description';
 import Swal from "sweetalert2";
 
-
-import { useSpring, animated } from '@react-spring/web';
-import SvgIcon from '@mui/material/SvgIcon';
-
-import Collapse from '@mui/material/Collapse';
-import { alpha, styled } from '@mui/material/styles';
-import { treeItemClasses } from '@mui/x-tree-view/TreeItem';
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import AutoComplete3 from "./AutoComplete";
 import GetRoleAutocomplete from "./AutoComplete";
+import LockIcon from '@mui/icons-material/Lock';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
 
 const buttonStyle = {
     textTransform: "none",
@@ -78,9 +65,10 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
     const [menu, setMenu] = React.useState([]);
     const [mode1, setMode1] = useState("");
     const [role, setRoles] = React.useState([]);
+    const [showPassword, setShowPassword] = useState(false); // State to manage password visibility
 
     const [formData, setFormData] = useState({});
-const [iIds,setIids]=useState()
+    const [iIds, setIids] = useState()
 
     const modalStyle = {
         display: isOpen ? "block" : "none",
@@ -89,7 +77,7 @@ const [iIds,setIids]=useState()
     useEffect(() => {
         setMode1(mode);
         setIids(formDataEdit)
-    }, [mode,formDataEdit]);
+    }, [mode, formDataEdit]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -196,7 +184,7 @@ const [iIds,setIids]=useState()
             });
             return;
         }
-    
+
         if (!formData.Password) {
             Swal.fire({
                 title: "Error!",
@@ -221,10 +209,10 @@ const [iIds,setIids]=useState()
             });
             return;
         }
-    
+
         // Regular expression for email validation
         const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    
+
         if (!formData.Email) {
             Swal.fire({
                 title: "Error!",
@@ -244,7 +232,7 @@ const [iIds,setIids]=useState()
             });
             return;
         }
-    
+
         if (!formData.Phone) {
             Swal.fire({
                 title: "Error!",
@@ -264,7 +252,7 @@ const [iIds,setIids]=useState()
             });
             return;
         }
-    
+
         try {
             const res = await UpsertUser({
                 id: formData.id,
@@ -315,7 +303,7 @@ const [iIds,setIids]=useState()
             }
         }
     };
- 
+
 
     const handleAllClear = () => {
         handleNewClose();
@@ -341,51 +329,51 @@ const [iIds,setIids]=useState()
         setMode1("new");
         setFormData(getInitialFormData())
         setIids(0)
-        
+
     };
 
 
-    const handleDelete = async () => {
+    // const handleDelete = async () => {
 
 
-        try {
-            if (!iIds) {
-                Swal.fire({
-                    title: "Error!",
-                    text: "choose data!!",
-                    icon: "error",
-                    showConfirmButton: false,
-                    timer: 1500,
-                });
-            } else {
-                const shouldDelete = await Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, delete it!',
-                    cancelButtonText: 'No, cancel it!'
-                });
+    //     try {
+    //         if (!iIds) {
+    //             Swal.fire({
+    //                 title: "Error!",
+    //                 text: "choose data!!",
+    //                 icon: "error",
+    //                 showConfirmButton: false,
+    //                 timer: 1500,
+    //             });
+    //         } else {
+    //             const shouldDelete = await Swal.fire({
+    //                 title: 'Are you sure?',
+    //                 text: "You won't be able to revert this!.",
+    //                 icon: 'warning',
+    //                 showCancelButton: true,
+    //                 confirmButtonText: 'Yes, delete it!',
+    //                 cancelButtonText: 'No, cancel it!'
+    //             });
 
-                if (shouldDelete.isConfirmed) {
-                    const res = await DeleteUser({ userId: iIds });
-                    // Add success message here if needed
-                    Swal.fire('Deleted!', 'The User has been deleted.', 'success');
-                } 
-            }
-            resetChangesTrigger()
-            handleNewClose()
+    //             if (shouldDelete.isConfirmed) {
+    //                 const res = await DeleteUser({ userId: iIds });
+    //                 // Add success message here if needed
+    //                 Swal.fire('Deleted!', 'The User has been deleted.', 'success');
+    //             }
+    //         }
+    //         resetChangesTrigger()
+    //         handleNewClose()
 
-        } catch (error) {
-            console.log("delete", error);
-            // Add error message here if needed
-            Swal.fire('Error', 'Failed to delete the User.', 'error');
-            resetChangesTrigger()
-            handleNewClose()
+    //     } catch (error) {
+    //         console.log("delete", error);
+    //         // Add error message here if needed
+    //         Swal.fire('Error', 'Failed to delete the User.', 'error');
+    //         resetChangesTrigger()
+    //         handleNewClose()
 
-        }
+    //     }
 
-    }
+    // }
 
 
     const handleInputChange = (e) => {
@@ -435,14 +423,14 @@ const [iIds,setIids]=useState()
                                     >
                                         Save
                                     </Button>
-                                    <Button
+                                    {/* <Button
                                         onClick={handleDelete}
                                         variant="contained"
                                         startIcon={<CloseIcon />}
                                         style={buttonStyle}
                                     >
                                         Delete
-                                    </Button>
+                                    </Button> */}
                                     <Button
                                         onClick={handleAllClear}
                                         variant="contained"
@@ -466,7 +454,7 @@ const [iIds,setIids]=useState()
 
                                         <div style={{ display: 'flex', marginBottom: '10px' }}>
                                             <MDBCol >
-                                                <Typography  > Login Name <span style={{color:'#1976D2',marginLeft:'1px'}}>*</span></Typography>
+                                                <Typography  > Login Name <span style={{ color: '#1976D2', marginLeft: '1px' }}>*</span></Typography>
                                             </MDBCol>
                                             <MDBCol >
                                                 <MDBInput
@@ -486,7 +474,7 @@ const [iIds,setIids]=useState()
                                         </div>
                                         <div style={{ display: 'flex', marginBottom: '10px' }}>
                                             <MDBCol >
-                                                <Typography  > ERP Role <span style={{color:'#1976D2',marginLeft:'1px'}}>*</span></Typography>
+                                                <Typography  > ERP Role <span style={{ color: '#1976D2', marginLeft: '1px' }}>*</span></Typography>
                                             </MDBCol>
                                             <MDBCol >
                                                 <GetRoleAutocomplete
@@ -500,7 +488,7 @@ const [iIds,setIids]=useState()
                                         </div>
                                         <div style={{ display: 'flex', marginBottom: '10px' }}>
                                             <MDBCol >
-                                                <Typography  > User Name <span style={{color:'#1976D2',marginLeft:'1px'}}>*</span></Typography>
+                                                <Typography  > User Name <span style={{ color: '#1976D2', marginLeft: '1px' }}>*</span></Typography>
                                             </MDBCol>
                                             <MDBCol >
                                                 <MDBInput
@@ -508,7 +496,7 @@ const [iIds,setIids]=useState()
                                                     // value={name}
                                                     id="form6Example1"
                                                     maxLength={100}
-                                                   name="UserName"
+                                                    name="UserName"
                                                     value={formData.UserName}
                                                     onChange={handleInputChange} labelStyle={{
                                                         fontSize: "15px",
@@ -519,9 +507,33 @@ const [iIds,setIids]=useState()
                                         </div>
                                         <div style={{ display: 'flex', marginBottom: '10px' }}>
                                             <MDBCol >
-                                                <Typography  > Password <span style={{color:'#1976D2',marginLeft:'1px'}}>*</span></Typography>
+                                                <Typography  > Password <span style={{ color: '#1976D2', marginLeft: '1px' }}>*</span></Typography>
                                             </MDBCol>
-                                            <MDBCol >
+                                            <div style={{ position: 'relative', width: '50%' }}>
+                                                <MDBInput
+                                                    required
+                                                    id="form6Example3"
+                                                    type={showPassword ? 'text' : 'password'} // Toggle type based on showPassword state
+                                                    name="Password"
+                                                    value={formData.Password}
+                                                    onChange={handleInputChange}
+                                                    icon={null} // Remove default eye icon
+
+                                                />
+                                                <div
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: '50%',
+                                                        right: '10px',
+                                                        transform: 'translateY(-50%)',
+                                                        cursor: 'pointer',
+                                                    }}
+                                                >
+                                                    {showPassword ? <LockOpenIcon /> : <LockIcon />}
+                                                </div>
+                                            </div>
+                                            {/* <MDBCol >
                                                 <MDBInput
                                                     required
                                                     // value={name}
@@ -535,7 +547,7 @@ const [iIds,setIids]=useState()
                                                     }}
                                                 />
 
-                                            </MDBCol>
+                                            </MDBCol> */}
                                         </div>
                                         {/* <div style={{ display: 'flex', marginBottom: '10px' }}>
                                             <MDBCol >
@@ -559,7 +571,7 @@ const [iIds,setIids]=useState()
                                         </div> */}
                                         <div style={{ display: 'flex', marginBottom: '10px' }}>
                                             <MDBCol >
-                                                <Typography  > Email <span style={{color:'#1976D2',marginLeft:'1px'}}>*</span></Typography>
+                                                <Typography  > Email <span style={{ color: '#1976D2', marginLeft: '1px' }}>*</span></Typography>
                                             </MDBCol>
                                             <MDBCol >
                                                 <MDBInput
@@ -578,7 +590,7 @@ const [iIds,setIids]=useState()
                                         </div>
                                         <div style={{ display: 'flex', marginBottom: '10px' }}>
                                             <MDBCol >
-                                                <Typography  > Phone No <span style={{color:'#1976D2',marginLeft:'1px'}}>*</span></Typography>
+                                                <Typography  > Phone No <span style={{ color: '#1976D2', marginLeft: '1px' }}>*</span></Typography>
                                             </MDBCol>
                                             <MDBCol >
                                                 <MDBInput
@@ -589,7 +601,7 @@ const [iIds,setIids]=useState()
                                                     name="Phone"
                                                     value={formData.Phone}
                                                     // type="number"
-                                                    
+
                                                     onChange={handleInputChange} labelStyle={{
                                                         fontSize: "15px",
                                                     }}

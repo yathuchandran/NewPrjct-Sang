@@ -25,14 +25,36 @@ const customFormGroupStyle2 = {
   height: '450px',
 
 };
-function Transaction({ formDataEdit, mode, settransactions,setNewState,newState, }) {
+function Transaction({ formDataEdit, mode, settransactions,setNewState,newState,transactions }) {
   const [formData, setFormData] = useState({});
   const [mode1, setMode1] = useState("");
-  const [AllowBillWiseAcc, setAllowBillWiseAcc] = useState(false);
+  
+  useEffect(()=>{
+    setFormData(transactions)
+  },[])
 
 React.useEffect(() => {
   if (newState === true) {
-      setFormData({});
+    console.log(newState);
+
+      setFormData({
+        iBudgetLimitWarn: 0,
+          iCannotAddAfter: 0,
+          iCannotEditAfter:0,
+          iCantPrintAfterValue: 0,
+          iCantRePrintAfterOption: 0,
+          iCannotEditAfterDaysOfMon: 0,
+          iCantPrintAfterOption:0,
+          iCannotAddPrevEntries: 0,
+          iCrLimitWarn: 0,
+          iNegativeCashChk:0,
+          iNegativeStkChk: 0,
+          iCantRePrintAfterValue: 0,
+          bAllowBillWiseAcc:false,
+          bCannotAddFutureTrans:false,
+          bNoCustomize: false,
+
+      });
       setNewState(false); // Move this line before the return statement
       return; // Make sure to have a return statement here
   }
@@ -41,6 +63,10 @@ React.useEffect(() => {
     setMode1(mode);
   }, [mode]);
 
+  // useEffect(() => {
+  //   localStorage.setItem('formData', JSON.stringify(formData));
+    
+  // }, [formData])
   useEffect(() => {
     settransactions(formData)
   }, [formData])
@@ -70,21 +96,21 @@ React.useEffect(() => {
 
         setFormData({
           ...formData,
-          iBudgetLimitWarn: iBudgetLimitWarn.join(','),
-          iCannotAddAfter: iCannotAddAfter.join(','),
-          iCannotEditAfter: iCannotEditAfter.join(','),
-          iCantPrintAfterValue: iCantPrintAfterValue.join(','),
-          iCantRePrintAfterOption: iCantRePrintAfterOption.join(','),
-          iCannotEditAfterDaysOfMon: iCannotEditAfterDaysOfMon.join(','),
-          iCantPrintAfterOption: iCantPrintAfterOption.join(','),
-          iCannotAddPrevEntries: iCannotAddPrevEntries.join(','),
-          iCrLimitWarn: iCrLimitWarn.join(','),
-          iNegativeCashChk: iNegativeCashChk.join(','),
-          iNegativeStkChk: iNegativeStkChk.join(','),
-          iCantRePrintAfterValue: iCantRePrintAfterValue.join(','),
-          bAllowBillWiseAcc: bAllowBillWiseAcc.join(','),
-          bCannotAddFutureTrans: bCannotAddFutureTrans.join(','),
-          bNoCustomize: bNoCustomize.join(','),
+          iBudgetLimitWarn: iBudgetLimitWarn.join(',') !==undefined? iBudgetLimitWarn.join(','):0,
+          iCannotAddAfter: iCannotAddAfter!==undefined? iCannotAddAfter:0,
+          iCannotEditAfter: iCannotEditAfter !==undefined? iCannotEditAfter:0,
+          iCantPrintAfterValue: iCantPrintAfterValue !==undefined? iCantPrintAfterValue:0,
+          iCantRePrintAfterOption: iCantRePrintAfterOption !==undefined? iCantRePrintAfterOption:0,
+          iCannotEditAfterDaysOfMon: iCannotEditAfterDaysOfMon !==undefined? iCannotEditAfterDaysOfMon:0,
+          iCantPrintAfterOption: iCantPrintAfterOption.join(',') !==undefined? iCantPrintAfterOption.join(','):0,
+          iCannotAddPrevEntries: iCannotAddPrevEntries !==undefined? iCannotAddPrevEntries:0,
+          iCrLimitWarn: iCrLimitWarn.join(',') !==undefined? iCrLimitWarn.join(','):0,
+          iNegativeCashChk: iNegativeCashChk.join(',') !==undefined? iNegativeCashChk.join(','):0,
+          iNegativeStkChk: iNegativeStkChk.join(',') !==undefined? iNegativeStkChk.join(','):0,
+          iCantRePrintAfterValue: iCantRePrintAfterValue.join(',') !==undefined? iCantRePrintAfterValue.join(','):0,
+          bAllowBillWiseAcc: bAllowBillWiseAcc.join(',') !==undefined? bAllowBillWiseAcc.join(','):false,
+          bCannotAddFutureTrans: bCannotAddFutureTrans.join(',')  !==undefined? bCannotAddFutureTrans.join(','):false,
+          bNoCustomize: bNoCustomize.join(',')  !==undefined? bNoCustomize.join(','):false,
 
 
         })
@@ -97,7 +123,7 @@ React.useEffect(() => {
 
     }
     if (mode1 === "new") {
-      setFormData(getInitialFormData());
+      setFormData([]);
     }
   }, [mode1, formDataEdit])
 
@@ -116,17 +142,7 @@ React.useEffect(() => {
 
 
         <div style={customFormGroupStyle2}  >
-          <div style={{ display: "flex", justifyContent: "flex-end", width: "100%", marginBottom: '10px' }}>
-            <FormControlLabel
-              control={<Checkbox
-                onChange={(e) => setFormData({ ...formData, bAllowBillWiseAcc: e.target.checked })}
-                checked={formData.bAllowBillWiseAcc}
-                sx={{ height: "10px" }}
-              />}
-              label="Allow Bill Wise On Account"
-            />
-
-          </div>
+      
           <div style={{ display: 'flex', marginBottom: '10px' }}>
             <MDBCol >
               <Typography  > Budget Limit Warning</Typography>
@@ -211,6 +227,17 @@ React.useEffect(() => {
             </MDBCol>
 
           </div>
+          <div style={{ display: "flex", justifyContent: "flex-end", width: "100%", marginBottom: '10px' }}>
+            <FormControlLabel
+              control={<Checkbox
+                onChange={(e) => setFormData({ ...formData, bAllowBillWiseAcc: e.target.checked })}
+                checked={formData.bAllowBillWiseAcc}
+                sx={{ height: "10px" }}
+              />}
+              label="Allow Bill Wise On Account"
+            />
+
+          </div>
 
         </div>
 
@@ -221,16 +248,7 @@ React.useEffect(() => {
             component="div">
             Edit Options
           </Typography>
-          <div style={{ display: "flex", width: "100%", marginBottom: '10px' }}>
-            <FormControlLabel
-              control={<Checkbox
-                onChange={(e) => setFormData({ ...formData, bCannotAddFutureTrans: e.target.checked })}
-                checked={formData.bCannotAddFutureTrans}
-                sx={{ height: "10px" }}
-              />}
-              label="Cannot add future Transactions"
-            />
-          </div>
+     
           <div style={{ display: 'flex', marginBottom: '10px' }}>
             <MDBCol >
               <Typography  > Cannot Add Transaction that are more than</Typography>
@@ -401,6 +419,16 @@ React.useEffect(() => {
                 sx={{ height: "10px" }}
               />}
               label="Do not allow Master Customization"
+            />
+          </div>
+          <div style={{ display: "flex", width: "100%", marginBottom: '10px' }}>
+            <FormControlLabel
+              control={<Checkbox
+                onChange={(e) => setFormData({ ...formData, bCannotAddFutureTrans: e.target.checked })}
+                checked={formData.bCannotAddFutureTrans}
+                sx={{ height: "10px" }}
+              />}
+              label="Cannot add future Transactions"
             />
           </div>
         </div>

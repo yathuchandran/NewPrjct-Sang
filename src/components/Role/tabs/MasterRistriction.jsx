@@ -27,14 +27,13 @@ const customFormGroupStyle2 = {
 };
 
 
-export default function MasterRistriction({ formDataEdit ,setMasters,mode,setNewState,newState,}) {
+export default function MasterRistriction({ formDataEdit, setMasters, mode,mode1, setNewState, newState,masterData }) {
   const [master, setmaster] = React.useState([]);
-  const [masteriId, setmasterId] = React.useState([]);
-  const [mode1, setMode1] = useState("");
-
-  useEffect(() => {
-    setMode1(mode);
-}, [mode]);
+  const [masteriId, setmasterId] = React.useState(null);
+  // const [mode1, setMode1] = useState("");
+  // useEffect(() => {
+  //   setMode1(mode);
+  // }, [mode]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,6 +52,7 @@ export default function MasterRistriction({ formDataEdit ,setMasters,mode,setNew
   const handleClickEvents = async (item) => {
     setmasterId(item.iId)
   };
+ 
   return (
     <div>
       <div style={{ display: 'flex' }}>
@@ -60,20 +60,20 @@ export default function MasterRistriction({ formDataEdit ,setMasters,mode,setNew
 
         <div style={customFormGroupStyle1}>
           <Typography sx={{ flex: "1 1 100%" }}
-                variant="h6"
-                id="tableTitle"
-                component="div">
+            variant="h6"
+            id="tableTitle"
+            component="div">
             Master
           </Typography>
           {master.map((item) => (
-           
+
             <div key={item.id} style={{ display: 'flex', alignItems: 'center' }}>
-            <FormControlLabel
-              control={<Checkbox checked={item.iId === masteriId} onChange={() => handleClickEvents(item)} sx={{ '& .MuiSvgIcon-root': { fontSize: 16 } }}/>}
-              label={<Typography sx={{ fontSize: '14px', paddingBottom: '5px', cursor: 'pointer', color: item.iId === masteriId ? 'blue' : 'inherit' }}>{item.sName}</Typography>}
-              sx={{ height: "23px" }}
-            />
-          </div>
+              <FormControlLabel
+                control={<Checkbox checked={item.iId === masteriId} onChange={() => handleClickEvents(item)} sx={{ '& .MuiSvgIcon-root': { fontSize: 16 } }} />}
+                label={<Typography sx={{ fontSize: '14px', paddingBottom: '5px', cursor: 'pointer', color: item.iId === masteriId ? 'blue' : 'inherit' }}>{item.sName}</Typography>}
+                sx={{ height: "23px" }}
+              />
+            </div>
           ))}
         </div>
 
@@ -97,12 +97,13 @@ export default function MasterRistriction({ formDataEdit ,setMasters,mode,setNew
                 Role
               </Typography>
             </Toolbar>
-            <EnhancedTable  masteriId={masteriId}
-            setMasters={setMasters}
-            formDataEdit={formDataEdit}
-            mode1={mode1}
-            setNewState={setNewState}
-            newState={newState}
+            <EnhancedTable masteriId={masteriId}
+              setMasters={setMasters}
+              formDataEdit={formDataEdit}
+              mode1={mode1}
+              masterData={masterData}
+              setNewState={setNewState}
+              newState={newState}
             />
 
           </Paper>
@@ -113,4 +114,3 @@ export default function MasterRistriction({ formDataEdit ,setMasters,mode,setNew
   )
 }
 
- 

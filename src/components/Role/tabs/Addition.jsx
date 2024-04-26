@@ -1,27 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Button, Stack, Box, Zoom, Typography, FormGroup, FormControlLabel, Checkbox, MenuItem, Menu, IconButton } from "@mui/material";
-import { MDBRow, MDBCol, MDBInput } from "mdb-react-ui-kit";
-import AddIcon from "@mui/icons-material/Add";
-import CloseIcon from "@mui/icons-material/Close";
-import SaveIcon from "@mui/icons-material/Save";
-import MenuIcon from "@mui/icons-material/Menu";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+
 
 import { TreeView, TreeItem } from '@mui/x-tree-view';
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import FolderIcon from "@mui/icons-material/Folder";
-import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-import DescriptionIcon from '@mui/icons-material/Description';
-import Swal from "sweetalert2";
-
-
-import { useSpring, animated } from '@react-spring/web';
 import SvgIcon from '@mui/material/SvgIcon';
-
-import Collapse from '@mui/material/Collapse';
-import { alpha, styled } from '@mui/material/styles';
-import { treeItemClasses } from '@mui/x-tree-view/TreeItem';
 import { GetMenuData, GetRoleActions } from "../../../api/Api";
 
 const buttonStyle = {
@@ -95,32 +77,30 @@ function StyledTreeItem(props) {
 }
 //////////////////////////////////////////////////////
 
-function Addition({ formDataEdit, setAdditions, setAssignedProfilesobj,setNewState,newState, }) {
-  const [open, setOpen] = React.useState(false);
-  const [warning, setWarning] = useState(false);
-  const [message, setMessage] = useState("");
-  const [name, setName] = useState("");
+function Addition({ formDataEdit, setAdditions, setNewState,newState,additions }) {
   const [menu, setMenu] = React.useState([]);
   const [ActionButton, setActionButton] = React.useState([]);
   const [SelectActionButton, setSelectActionButton] = React.useState([]);
   const [menuId, setMenuId] = React.useState([]);
 
-  const dataArray = SelectActionButton.flatMap(item => {
-    const combinedIds = item.combinedIds;
-    return combinedIds.map(combinedId => {
-      const [iMenu, iAction] = combinedId.split('_');
-      return {
-        iMenu: parseInt(iMenu),
-        iAction: parseInt(iAction)
-      };
-    });
-  });
+  // const dataArray = SelectActionButton.flatMap(item => {
+  //   const combinedIds = item.combinedIds;
+  //   return combinedIds.map(combinedId => {
+  //     const [iMenu, iAction] = combinedId.split('_');
+  //     return {
+  //       iMenu: parseInt(iMenu),
+  //       iAction: parseInt(iAction)
+  //     };
+  //   });
+  // });
 
-
+useEffect(()=>{
+  setSelectActionButton(additions)
+},[])
 
   useEffect(() => {
-    setAdditions(dataArray)
-  }, [])
+    setAdditions(SelectActionButton)
+  }, [SelectActionButton])
 
   React.useEffect(() => {
     if (newState === true) {
@@ -179,7 +159,7 @@ function Addition({ formDataEdit, setAdditions, setAssignedProfilesobj,setNewSta
           combinedIds: combinedIds
         }));
         setActionButton(uncheckedIds);
-        setSelectActionButton(selectActionButton);
+        // setSelectActionButton(selectActionButton);
 
       } else {
         console.log("All states are checked.");
@@ -192,7 +172,6 @@ function Addition({ formDataEdit, setAdditions, setAssignedProfilesobj,setNewSta
   };
 
   const ClickEvents = async (subMenu) => {
-
     try {
       const response = await GetRoleActions({
         menuId: subMenu.iId,
@@ -224,7 +203,7 @@ function Addition({ formDataEdit, setAdditions, setAssignedProfilesobj,setNewSta
           combinedIds: combinedIds
         }));
         setActionButton(uncheckedIds);
-        setSelectActionButton(selectActionButton);
+        // setSelectActionButton(selectActionButton);
 
       } else {
         console.log("All states are checked. value 1");

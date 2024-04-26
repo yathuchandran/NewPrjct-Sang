@@ -75,23 +75,70 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
 
     const [value, setValue] = React.useState(0);
 
-// const [AssignedProfiles, setAssignedProfiles] = useState({});
-    // const [AssignedProfilesObj, setAssignedProfilesobj] = useState({});
-    const [profileId, setProfileId] = useState('')
-    
+    const [AssignedProfiles, setAssignedProfiles] = useState([]);
+    const [AssignedProfilesObj, setAssignedProfilesobj] = useState([]);
+    const [profileId, setProfileId] = useState([])
+
     const [additions, setAdditions] = useState([]);
     const [exclutions, setexclutions] = useState([]);
     const [masters, setMasters] = useState([]);
     const [transactions, settransactions] = useState({});
-const [newState,setNewState]=useState(false)
-  
-console.log(profileId,"profileId++++++++++++++++==============================");
-console.log(masters,"masters------------------------");
+    const [newState, setNewState] = useState(false)
 
-useEffect(()=>{
-    const profileIds = JSON.parse(localStorage.getItem('profileId'));
-    setProfileId(profileIds)
-},[])
+
+    //ADDITION ACTION DATA CONVERTING OBJECTVISE--------------------------------------------------------------------------------------------
+    const additiondata = additions.flatMap(item => {
+        const combinedIds = item.combinedIds;
+        return combinedIds.map(combinedId => {
+          const [iMenu, iAction] = combinedId.split('_');
+          return {
+            iMenu: parseInt(iMenu),
+            iAction: parseInt(iAction)
+          };
+        });
+      });
+
+      
+      //exclution action data converting object----------------------------------------------------------------------------------------------
+      const exclutiondata = exclutions.length > 0 ? exclutions.flatMap(item => {
+        const combinedIds = item.combinedIds;
+        return combinedIds.map(combinedId => {
+          const [iMenu, iAction] = combinedId.split('_');
+          return {
+            iMenu: parseInt(iMenu),
+            iAction: parseInt(iAction)
+          };
+        });
+      }) : [];
+
+
+      console.log(masters,"masters=================================================");
+
+    
+
+
+
+    //AssignedProfiles NAME TO CONVERT ID------------------------------------------------------------------------------------------------
+    React.useEffect(() => {
+        if (Array.isArray(AssignedProfilesObj)) {
+            const allProfiles = AssignedProfilesObj.map((item) => item.sProfileName);
+
+            if (AssignedProfiles.every((profile) => allProfiles.includes(profile))) {
+                const matchingProfiles = AssignedProfilesObj.filter((item) =>
+                    AssignedProfiles.includes(item.sProfileName)
+                );
+
+                const matchingIds = matchingProfiles.map((item) => item.iProfileId);
+
+                const profileIds = matchingIds.join(', '); // This will result in "51, 27, 33"
+                setProfileId(profileIds);
+            }
+        } else {
+            console.log('totalData is not an array or is empty.');
+        }
+    }, [AssignedProfiles, AssignedProfilesObj]);
+
+    const ProfileId = JSON.parse(localStorage.getItem('profileId'));
 
 
     const modalStyle = {
@@ -147,7 +194,7 @@ useEffect(()=>{
                 });
                 return;
             }
-            if (!profileId) {
+            if (!ProfileId) {
                 Swal.fire({
                     title: "Error!",
                     text: "choose Profile!!",
@@ -161,11 +208,11 @@ useEffect(()=>{
                 const response = await UpsertRole({
                     roleId: formDataEdit,
                     roleName: name,
-                    profileId: profileId,
+                    profileId: ProfileId,
                     rolesMasters: masters,
                     roleTransRights: transactions,
-                    menuActionAddition: additions,
-                    menuActionExclusion: exclutions
+                    menuActionAddition: additiondata,
+                    menuActionExclusion: exclutiondata
                 })
                 const result = JSON.parse(response.result)
                 if (response.message === "Role Inserted Successfully." || response.message === "Role Updated Successfully.") {
@@ -197,7 +244,7 @@ useEffect(()=>{
                 });
                 return;
             }
-            if (!profileId) {
+            if (!ProfileId) {
                 Swal.fire({
                     title: "Error!",
                     text: "choose Profile!!",
@@ -211,11 +258,11 @@ useEffect(()=>{
                 const response = await UpsertRole({
                     roleId: 0,
                     roleName: name,
-                    profileId: profileId,
-                    rolesMasters:masters,
+                    profileId: ProfileId,
+                    rolesMasters: masters,
                     roleTransRights: transactions,
-                    menuActionAddition: additions,
-                    menuActionExclusion: exclutions
+                    menuActionAddition: additiondata,
+                    menuActionExclusion: exclutiondata
                 })
                 if (response.message === "Role Inserted Successfully." || response.message === "Role Updated Successfully.") {
                     Swal.fire({
@@ -234,6 +281,7 @@ useEffect(()=>{
                 handleNewClose()
             } catch (error) {
                 console.log("Role UpsertRole ", error)
+
                 if (error.response.data.message) {
                     Swal.fire({
                         title: "Error!",
@@ -241,18 +289,29 @@ useEffect(()=>{
                         icon: "error",
                         showConfirmButton: false,
                         timer: 1500,
-                    });  
-                }else{
+                    });
+                    if (error.response.data.statusCode===409) {
+                        Swal.fire({
+                            title: "Error!",
+                            text: `${error.response.data.message}`,
+                            icon: "error",
+                            showConfirmButton: false,
+                            timer: 1500,
+                        });
+                    }else{
+                        handleNewClose()
+
+                    }
+                } else {
                     Swal.fire({
                         title: "Error!",
                         text: `${error.message}`,
                         icon: "error",
                         showConfirmButton: false,
                         timer: 1500,
-                    });  
+                    });
                 }
-                    
-                    handleNewClose()         
+
             }
         }
 
@@ -280,12 +339,12 @@ useEffect(()=>{
         setWarning(false);
     };
     const newButtonClick = () => {
-        setName('')
         setMode1("new");
-       
+
+        setName('')
+
         setNewState(true)
     };
-
 
 
 
@@ -302,23 +361,23 @@ useEffect(()=>{
                     icon: "error",
                     showConfirmButton: false,
                     timer: 1500,
-                });  
-            }else{
-            const shouldDelete = await Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'No, cancel it'
-            });
+                });
+            } else {
+                const shouldDelete = await Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete it!',
+                    cancelButtonText: 'No, cancel it'
+                });
 
-            if (shouldDelete.isConfirmed) {
-                const res = await DeleteProfile({ profileId: formDataEdit });
-                // Add success message here if needed
-                Swal.fire('Deleted!', 'The Role has been deleted.', 'success');
+                if (shouldDelete.isConfirmed) {
+                    const res = await DeleteProfile({ profileId: formDataEdit });
+                    // Add success message here if needed
+                    Swal.fire('Deleted!', 'The Role has been deleted.', 'success');
+                }
             }
-        }
             handleNewClose()
             resetChangesTrigger()
 
@@ -361,14 +420,14 @@ useEffect(()=>{
                                     padding={2}
                                     justifyContent="flex-end"
                                 >
-                                    <Button
+                                    {/* <Button
                                         onClick={newButtonClick}
                                         variant="contained"
                                         startIcon={<AddIcon />}
                                         style={buttonStyle}
                                     >
                                         New
-                                    </Button>
+                                    </Button> */}
                                     <Button
                                         onClick={handleSaveAccount}
                                         variant="contained"
@@ -377,14 +436,14 @@ useEffect(()=>{
                                     >
                                         Save
                                     </Button>
-                                    <Button
+                                    {/* <Button
                                         onClick={handleDelete}
                                         variant="contained"
                                         startIcon={<CloseIcon />}
                                         style={buttonStyle}
                                     >
                                         Delete
-                                    </Button>
+                                    </Button> */}
                                     <Button
                                         onClick={handleAllClear}
                                         variant="contained"
@@ -438,12 +497,14 @@ useEffect(()=>{
                                                 {value === 0 && (
                                                     <Box sx={{ p: 3 }}>
                                                         <AssignedProfile roleId={formDataEdit}
-                                                            // setAssignedProfiles={setAssignedProfiles}
-                                                            // setAssignedProfilesobj={setAssignedProfilesobj}
+                                                            setAssignedProfiles={setAssignedProfiles}
+                                                            setAssignedProfilesobj={setAssignedProfilesobj}
+                                                            AssignedProfiles={AssignedProfiles}
+                                                            AssignedProfilesObj={AssignedProfilesObj}
                                                             setNewState={setNewState}
                                                             newState={newState}
                                                             mode={mode} />
-                                                            
+
                                                     </Box>
                                                 )}
                                             </div>
@@ -452,6 +513,7 @@ useEffect(()=>{
                                                     <Box sx={{ p: 3 }}>
                                                         <Addition formDataEdit={formDataEdit}
                                                             setAdditions={setAdditions}
+                                                            additions={additions}
                                                             setNewState={setNewState}
                                                             newState={newState}
                                                             mode={mode} />
@@ -464,6 +526,7 @@ useEffect(()=>{
                                                         <Exclusion formDataEdit={formDataEdit}
                                                             setexclutions={setexclutions}
                                                             setNewState={setNewState}
+                                                            exclutions={exclutions}
                                                             newState={newState}
                                                             mode={mode} />
                                                     </Box>
@@ -475,8 +538,10 @@ useEffect(()=>{
                                                         <MasterRistriction formDataEdit={formDataEdit}
                                                             setMasters={setMasters}
                                                             setNewState={setNewState}
+                                                            masterData={masters}
                                                             newState={newState}
-                                                            mode={mode} />
+                                                            mode={mode}
+                                                            mode1={mode1} />
                                                     </Box>
                                                 )}
                                             </div>
@@ -487,6 +552,7 @@ useEffect(()=>{
                                                             settransactions={settransactions}
                                                             setNewState={setNewState}
                                                             newState={newState}
+                                                            transactions={transactions}
                                                             mode={mode}
                                                         />
                                                     </Box>

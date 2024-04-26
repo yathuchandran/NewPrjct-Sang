@@ -513,44 +513,44 @@ const ClickEvents= async (subMenu,menuList) => {
     };
     
 
-    const handleDelete = async () => {
+    // const handleDelete = async () => {
 
-        try {
-            if (!formDataEdit) {
-                Swal.fire({
-                    title: "Error!",
-                    text: "choose data!!",
-                    icon: "error",
-                    showConfirmButton: false,
-                    timer: 1500,
-                });
-            } else {
-                const shouldDelete = await Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, delete it!',
-                    cancelButtonText: 'No, cancel it!'
-                });
+    //     try {
+    //         if (!formDataEdit) {
+    //             Swal.fire({
+    //                 title: "Error!",
+    //                 text: "choose data!!",
+    //                 icon: "error",
+    //                 showConfirmButton: false,
+    //                 timer: 1500,
+    //             });
+    //         } else {
+    //             const shouldDelete = await Swal.fire({
+    //                 title: 'Are you sure?',
+    //                 text: "You won't be able to revert this!.",
+    //                 icon: 'warning',
+    //                 showCancelButton: true,
+    //                 confirmButtonText: 'Yes, delete it!',
+    //                 cancelButtonText: 'No, cancel it!'
+    //             });
 
-                if (shouldDelete.isConfirmed) {
-                    const res = await DeleteProfile({ profileId: formDataEdit });
-                    // Add success message here if needed
-                    Swal.fire('Deleted!', 'The profile has been deleted.', 'success');
-                }
-            }
-            resetChangesTrigger()
-            handleNewClose()
-        } catch (error) {
-            console.log("delete", error);
-            // Add error message here if needed
-            Swal.fire('Error', 'Failed to delete the profile.', 'error');
-            resetChangesTrigger()
-            handleNewClose()
-        }
+    //             if (shouldDelete.isConfirmed) {
+    //                 const res = await DeleteProfile({ profileId: formDataEdit });
+    //                 // Add success message here if needed
+    //                 Swal.fire('Deleted!', 'The profile has been deleted.', 'success');
+    //             }
+    //         }
+    //         resetChangesTrigger()
+    //         handleNewClose()
+    //     } catch (error) {
+    //         console.log("delete", error);
+    //         // Add error message here if needed
+    //         Swal.fire('Error', 'Failed to delete the profile.', 'error');
+    //         resetChangesTrigger()
+    //         handleNewClose()
+    //     }
 
-    }
+    // }
     return (
         <div><div
             className={`modal-backdrop fade ${isOpen ? "show" : ""}`}
@@ -589,14 +589,14 @@ const ClickEvents= async (subMenu,menuList) => {
                                     >
                                         Save
                                     </Button>
-                                    <Button
+                                    {/* <Button
                                         onClick={handleDelete}
                                         variant="contained"
                                         startIcon={<CloseIcon />}
                                         style={buttonStyle}
                                     >
                                         Delete
-                                    </Button>
+                                    </Button> */}
                                     <Button
                                         onClick={handleAllClear}
                                         variant="contained"

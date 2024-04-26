@@ -79,30 +79,22 @@ function StyledTreeItem(props) {
 //////////////////////////////////////////////////////
 
 
-function Exclusion({ formDataEdit, setexclutions ,setNewState,newState,}) {
-  const [open, setOpen] = React.useState(false);
-  const [warning, setWarning] = useState(false);
-  const [message, setMessage] = useState("");
-  const [name, setName] = useState("");
+function Exclusion({ formDataEdit, setexclutions ,setNewState,newState,exclutions}) {
+  
   const [menu, setMenu] = React.useState([]);
   const [ActionButton, setActionButton] = React.useState([]);
   const [SelectActionButton, setSelectActionButton] = React.useState([]);
   const [menuId, setMenuId] = React.useState([]);
 
-  const dataArray = SelectActionButton.flatMap(item => {
-    const combinedIds = item.combinedIds;
-    return combinedIds.map(combinedId => {
-      const [iMenu, iAction] = combinedId.split('_');
-      return {
-        iMenu: parseInt(iMenu),
-        iAction: parseInt(iAction)
-      };
-    });
-  });
+useEffect(()=>{
+  setSelectActionButton(exclutions)
+},[])
+
+
 
   useEffect(() => {
-    setexclutions(dataArray)
-  }, [])
+    setexclutions(SelectActionButton)
+  }, [SelectActionButton])
 
   React.useEffect(() => {
     if (newState === true) {
@@ -159,7 +151,7 @@ function Exclusion({ formDataEdit, setexclutions ,setNewState,newState,}) {
           combinedIds: combinedIds
         }));
         setActionButton(uncheckedIds);
-        setSelectActionButton(selectActionButton);
+        // setSelectActionButton(selectActionButton);
 
       } else {
         console.log("All states are checked.");
@@ -202,7 +194,7 @@ function Exclusion({ formDataEdit, setexclutions ,setNewState,newState,}) {
           combinedIds: combinedIds
         }));
         setActionButton(uncheckedIds);
-        setSelectActionButton(selectActionButton);
+        // setSelectActionButton(selectActionButton);
 
       } else {
         console.log("All states are 0.");
@@ -253,34 +245,6 @@ function Exclusion({ formDataEdit, setexclutions ,setNewState,newState,}) {
   };
 
 
-  // const handleCheckboxChange = (iActionId) => {
-  //     const combinedId = `${menuId}_${iActionId}`
-  //     setSelectActionButton((prevItems) => {
-  //         if (Array.isArray(prevItems)) { // Check if prevItems is an array
-  //             if (prevItems.includes(combinedId)) {
-  //                 return prevItems.filter((id) => id !== combinedId); // Deselect if already selected
-  //             } else {
-  //                 return [...prevItems, combinedId]; // Select if not selected
-  //             }
-  //         } else {
-  //             return [combinedId]; // If it's not an array, initialize with iId
-  //         }
-  //     });
-  // };
-
-  //     const handleSelectAll = () => {
-  //         const combinedId = ActionButton.map((actionItem) => `${menuId}_${actionItem.iActionId}`).join(',');
-  //         const combindeIdString=combinedId.split(',')
-  //         // setSelectActionButton(combinedId.split(','));
-  //         //  setSelectActionButton([...SelectActionButton, combindeIdString]);
-  //          setSelectAll(combindeIdString)
-  //          // To update the state:
-  //   setState({
-  //     ...state,
-  //     selectAll:combindeIdString,
-  //     selectActionButton: SelectActionButton
-  //   });
-  //     };
   const handleSelectAll = () => {
     const combinedId = ActionButton.map((actionItem) => `${menuId}_${actionItem.iActionId}`).join(',');
     const combinedIdArray = combinedId.split(',');
@@ -323,30 +287,6 @@ function Exclusion({ formDataEdit, setexclutions ,setNewState,newState,}) {
     }
   };
 
-  // const handleCheckboxChange = (iActionId) => {
-  //   const combinedId = `${menuId}_${iActionId}`
-  //   setSelectActionButton((prevItems) => {
-  //       if (Array.isArray(prevItems)) { // Check if prevItems is an array
-  //           if (prevItems.includes(combinedId)) {
-  //               return prevItems.filter((id) => id !== combinedId); // Deselect if already selected
-  //           } else {
-  //               return [...prevItems, combinedId]; // Select if not selected
-  //           }
-  //       } else {
-  //           return [combinedId]; // If it's not an array, initialize with iId
-  //       }
-  //   });
-  // };
-
-  // const handleSelectAll = () => {
-  //   const combinedId = ActionButton.map((actionItem) => `${menuId}_${actionItem.iActionId}`).join(',');
-  //   console.log(combinedId, "select all");
-  //   setSelectActionButton(combinedId.split(','));
-  // };
-
-  // const handleUnselectAll = () => {
-  //   setSelectActionButton([])
-  // };
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
