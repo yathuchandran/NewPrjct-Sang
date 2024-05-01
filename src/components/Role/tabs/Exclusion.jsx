@@ -119,7 +119,15 @@ useEffect(()=>{
 
 
   const ProfileId = JSON.parse(localStorage.getItem('profileId'));
-
+  if (!ProfileId) {
+    Swal.fire({
+      title: 'Warning',
+      text: ' choose the Profile',
+      icon: 'warning',
+      button: 'OK',
+    });
+  }
+  
   const handleClickEvents = async (thirdMenu) => {
     try {
       const response = await GetRoleActions({

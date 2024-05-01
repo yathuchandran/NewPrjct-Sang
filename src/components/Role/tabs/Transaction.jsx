@@ -134,7 +134,7 @@ React.useEffect(() => {
       [name]: value,
     }));
   };
-
+console.log(formData.bAllowBillWiseAcc,"formData",formData.bNoCustomize ,formData.bCannotAddFutureTrans );
 
   return (
     <div>
@@ -231,7 +231,8 @@ React.useEffect(() => {
             <FormControlLabel
               control={<Checkbox
                 onChange={(e) => setFormData({ ...formData, bAllowBillWiseAcc: e.target.checked })}
-                checked={formData.bAllowBillWiseAcc}
+                
+                checked={formData.bAllowBillWiseAcc || false} 
                 sx={{ height: "10px" }}
               />}
               label="Allow Bill Wise On Account"
@@ -261,7 +262,7 @@ React.useEffect(() => {
                 maxLength={50}
                 name="iCannotAddAfter"
                 type='number'
-                value={formData.iCannotAddAfter}
+                value={formData.iCannotAddAfter  }
                 onChange={handleInputChange}
                 labelStyle={{
                   fontSize: "15px",
@@ -415,7 +416,7 @@ React.useEffect(() => {
             <FormControlLabel
               control={<Checkbox
                 onChange={(e) => setFormData({ ...formData, bNoCustomize: e.target.checked })}
-                checked={formData.bNoCustomize}
+                checked={formData.bNoCustomize || false}
                 sx={{ height: "10px" }}
               />}
               label="Do not allow Master Customization"
@@ -425,7 +426,7 @@ React.useEffect(() => {
             <FormControlLabel
               control={<Checkbox
                 onChange={(e) => setFormData({ ...formData, bCannotAddFutureTrans: e.target.checked })}
-                checked={formData.bCannotAddFutureTrans}
+                checked={formData.bCannotAddFutureTrans || false }
                 sx={{ height: "10px" }}
               />}
               label="Cannot add future Transactions"

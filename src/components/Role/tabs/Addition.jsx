@@ -5,6 +5,7 @@ import { Button, Stack, Box, Zoom, Typography, FormGroup, FormControlLabel, Chec
 import { TreeView, TreeItem } from '@mui/x-tree-view';
 import SvgIcon from '@mui/material/SvgIcon';
 import { GetMenuData, GetRoleActions } from "../../../api/Api";
+import Swal from "sweetalert2";
 
 const buttonStyle = {
   textTransform: "none",
@@ -126,6 +127,14 @@ useEffect(()=>{
 
 
   const ProfileId = JSON.parse(localStorage.getItem('profileId'));
+  if (!ProfileId) {
+    Swal.fire({
+      title: 'Warning',
+      text: ' choose the Profile',
+      icon: 'warning',
+      button: 'OK',
+    });
+  }
 
   const handleClickEvents = async (thirdMenu) => {
     setActionButton([])
