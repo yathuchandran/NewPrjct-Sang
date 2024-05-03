@@ -10,7 +10,7 @@ import { TreeView, TreeItem } from '@mui/x-tree-view';
 import Swal from "sweetalert2";
 import { useSpring, animated } from '@react-spring/web';
 import SvgIcon from '@mui/material/SvgIcon';
-import { GetMenuData, GetRoleActions } from "../../../api/Api";
+import { GetMenuData, GetRoleActions, GetRoleDetails } from "../../../api/Api";
 
 
 
@@ -79,16 +79,18 @@ function StyledTreeItem(props) {
 //////////////////////////////////////////////////////
 
 
-function Exclusion({ formDataEdit, setexclutions ,setNewState,newState,exclutions}) {
-  
+function Exclusion({ formDataEdit, setexclutions, setNewState, newState, exclutions, mode1 }) {
+
   const [menu, setMenu] = React.useState([]);
   const [ActionButton, setActionButton] = React.useState([]);
   const [SelectActionButton, setSelectActionButton] = React.useState([]);
   const [menuId, setMenuId] = React.useState([]);
 
-useEffect(()=>{
-  setSelectActionButton(exclutions)
-},[])
+  useEffect(() => {
+    setSelectActionButton(exclutions)
+  }, [])
+
+  // console.log(SelectActionButton, "SelectActionButton",ActionButton);
 
 
 
@@ -99,10 +101,10 @@ useEffect(()=>{
   React.useEffect(() => {
     if (newState === true) {
       setSelectActionButton([]);
-        setNewState(false); // Move this line before the return statement
-        return; // Make sure to have a return statement here
+      setNewState(false); // Move this line before the return statement
+      return; // Make sure to have a return statement here
     }
-}, [newState]);
+  }, [newState]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -127,93 +129,215 @@ useEffect(()=>{
       button: 'OK',
     });
   }
-  
   const handleClickEvents = async (thirdMenu) => {
-    try {
-      const response = await GetRoleActions({
-        menuId: thirdMenu.iId,
-        profileId: ProfileId
-      })
-      const data = JSON.parse(response.result)
-      const uncheckedIds = [];
-      for (const item of data) {
-        if (item.isChecked === 1) {
-          uncheckedIds.push(item);
+    if (mode1 === "new") {
+      //new ======================================================================================================
+
+      try {
+        const response = await GetRoleActions({
+          menuId: thirdMenu.iId,
+          profileId: ProfileId
+        })
+        const data = JSON.parse(response.result)
+        const uncheckedIds = [];
+        for (const item of data) {
+          if (item.isChecked === 1) {
+            uncheckedIds.push(item);
+          }
+        }
+        if (uncheckedIds.length > 0) {
+          const combinedIdsMap = new Map(); // Use a map to group combinedIds by menuId
+          uncheckedIds.forEach(actionItem => {
+            const key = thirdMenu.iId
+            const combinedId = `${thirdMenu.iId}_${actionItem.iActionId}`;
+
+            if (combinedIdsMap.has(key)) {
+              combinedIdsMap.get(key).push(combinedId);
+            } else {
+              combinedIdsMap.set(key, [combinedId]);
+            }
+          })
+
+          const selectActionButton = Array.from(combinedIdsMap).map(([menuId, combinedIds]) => ({
+            menuId: menuId,
+            combinedIds: combinedIds
+          }));
+          setActionButton(uncheckedIds);
+          // setSelectActionButton(selectActionButton);
+
+        } else {
+          console.log("All states are checked.");
+        }
+        setMenuId(thirdMenu.iId)
+      } catch (error) {
+        console.log("Get Actions ", error)
+      }
+
+    } else {
+      //EDIT =================================================================================================================
+
+      let roleId = formDataEdit
+
+      const GetProfileDetails7 = async () => {
+        try {
+          const response = await GetRoleDetails({ roleId: roleId })
+          const data = JSON.parse(response.result).Table1
+          const datas = JSON.parse(response.result)
+
+          console.log(data, "data",datas,"-----------------------");
+          const uncheckedIds = [];
+          for (const item of data) {
+            if (item.bAdd === true) {
+              uncheckedIds.push(item);
+            }
+          }
+          uncheckedIds.forEach(actionItems =>{
+            if (thirdMenu.iId == actionItems.iMenuId) {
+              if (uncheckedIds.length > 0) {
+                const combinedIdsMap = new Map(); // Use a map to group combinedIds by menuId
+                uncheckedIds.forEach(actionItem => {
+                    const key = thirdMenu.iId
+                    const combinedId = `${thirdMenu.iId}_${actionItem.iActionId}`;    
+                    if (combinedIdsMap.has(key)) {
+                      combinedIdsMap.get(key).push(combinedId);
+                    } else {
+                      combinedIdsMap.set(key, [combinedId]);
+                    }    
+                })
+    
+                const selectActionButton = Array.from(combinedIdsMap).map(([menuId, combinedIds]) => ({
+                  menuId: menuId,
+                  combinedIds: combinedIds
+                }));
+                setActionButton(uncheckedIds);    
+              } else {
+                console.log("All states are 0.");
+              }
+              setMenuId(thirdMenu.iId)
+
+            }else{
+              setActionButton([]);
+            }
+          })
+        } catch (error) {
+          console.log("Get RoleDetails", error);
         }
       }
-      if (uncheckedIds.length > 0) {
-        const combinedIdsMap = new Map(); // Use a map to group combinedIds by menuId
-        uncheckedIds.forEach(actionItem => {
-          const key = thirdMenu.iId
-          const combinedId = `${thirdMenu.iId}_${actionItem.iActionId}`;
-
-          if (combinedIdsMap.has(key)) {
-            combinedIdsMap.get(key).push(combinedId);
-          } else {
-            combinedIdsMap.set(key, [combinedId]);
-          }
-        })
-
-        const selectActionButton = Array.from(combinedIdsMap).map(([menuId, combinedIds]) => ({
-          menuId: menuId,
-          combinedIds: combinedIds
-        }));
-        setActionButton(uncheckedIds);
-        // setSelectActionButton(selectActionButton);
-
-      } else {
-        console.log("All states are checked.");
+      if (formDataEdit > 0) {
+        GetProfileDetails7()
       }
-      setMenuId(thirdMenu.iId)
-    } catch (error) {
-      console.log("Get Actions ", error)
     }
+
+
+
+
   };
 
-  const ClickEvents= async (subMenu,menuList) => {
+  const ClickEvents = async (subMenu, menuList) => {
+    if (mode1 === "new") {
+            //new ======================================================================================================
 
-    try {
-      const response = await GetRoleActions({
-        menuId: subMenu.iId,
-        profileId: ProfileId
-      })
-      const data = JSON.parse(response.result)
-      const uncheckedIds = [];
-      for (const item of data) {
-        if (item.isChecked === 1) {
-          uncheckedIds.push(item);
+      try {
+        const response = await GetRoleActions({
+          menuId: subMenu.iId,
+          profileId: ProfileId
+        })
+        const data = JSON.parse(response.result)
+        const uncheckedIds = [];
+        for (const item of data) {
+          if (item.isChecked === 1) {
+            uncheckedIds.push(item);
+          }
+        }
+        if (uncheckedIds.length > 0) {
+          const combinedIdsMap = new Map(); // Use a map to group combinedIds by menuId
+          uncheckedIds.forEach(actionItem => {
+            const key = subMenu.iId
+            const combinedId = `${subMenu.iId}_${actionItem.iActionId}`;
+
+            if (combinedIdsMap.has(key)) {
+              combinedIdsMap.get(key).push(combinedId);
+            } else {
+              combinedIdsMap.set(key, [combinedId]);
+            }
+          })
+
+          const selectActionButton = Array.from(combinedIdsMap).map(([menuId, combinedIds]) => ({
+            menuId: menuId,
+            combinedIds: combinedIds
+          }));
+          setActionButton(uncheckedIds);
+
+        } else {
+          console.log("All states are 0.");
+        }
+        setMenuId(subMenu.iId)
+      } catch (error) {
+        console.log("Get Actions ", error)
+      }
+
+    } else if (mode1 === "edit"){
+      //EDIT =================================================================================================================
+
+      let roleId = formDataEdit
+
+      const GetProfileDetails7 = async () => {
+        try {
+          const response = await GetRoleDetails({ roleId: roleId })
+          const data = JSON.parse(response.result).Table1
+          const uncheckedIds = [];
+          for (const item of data) {
+            if (item.bAdd === true) {
+              uncheckedIds.push(item);
+            }
+          }
+
+          uncheckedIds.forEach(actionItems =>{
+            if (subMenu.iId == actionItems.iMenuId) {
+              if (uncheckedIds.length > 0) {
+                const combinedIdsMap = new Map(); // Use a map to group combinedIds by menuId
+                uncheckedIds.forEach(actionItem => {
+                    const key = subMenu.iId
+                    const combinedId = `${subMenu.iId}_${actionItem.iActionId}`;
+    
+                    if (combinedIdsMap.has(key)) {
+                      combinedIdsMap.get(key).push(combinedId);
+                    } else {
+                      combinedIdsMap.set(key, [combinedId]);
+                    }    
+                })
+    
+                const selectActionButton = Array.from(combinedIdsMap).map(([menuId, combinedIds]) => ({
+                  menuId: menuId,
+                  combinedIds: combinedIds
+                }));
+                setActionButton(uncheckedIds);
+    
+              } else {
+                console.log("All states are 0.");
+              }
+              setMenuId(subMenu.iId)
+            }else{
+              setActionButton([]);
+            }
+          })
+
+        } catch (error) {
+          console.log("Get RoleDetails", error);
         }
       }
-      if (uncheckedIds.length > 0) {
-        const combinedIdsMap = new Map(); // Use a map to group combinedIds by menuId
-        uncheckedIds.forEach(actionItem => {
-          const key = subMenu.iId
-          const combinedId = `${subMenu.iId}_${actionItem.iActionId}`;
-
-          if (combinedIdsMap.has(key)) {
-            combinedIdsMap.get(key).push(combinedId);
-          } else {
-            combinedIdsMap.set(key, [combinedId]);
-          }
-        })
-
-        const selectActionButton = Array.from(combinedIdsMap).map(([menuId, combinedIds]) => ({
-          menuId: menuId,
-          combinedIds: combinedIds
-        }));
-        setActionButton(uncheckedIds);
-        // setSelectActionButton(selectActionButton);
-
-      } else {
-        console.log("All states are 0.");
+      if (formDataEdit > 0) {
+        GetProfileDetails7()
       }
-      setMenuId(subMenu.iId)
-    } catch (error) {
-      console.log("Get Actions ", error)
     }
-}
+  }
+
+
   const handleCheckboxChange = (iActionId) => {
+    console.log(iActionId,"iActionId",menuId);
+
     const combinedId = `${menuId}_${iActionId}`;
+    console.log(combinedId,"combinedId");
     setSelectActionButton((prevItems) => {
       if (Array.isArray(prevItems)) { // Check if prevItems is an array
         const existingIndex = prevItems.findIndex(item => item.menuId === menuId);
@@ -328,7 +452,7 @@ useEffect(()=>{
                         key={subMenu.iId}
                         nodeId={subMenu.iId.toString()}
                         labelText={subMenu.sName}
-                        onClick={() => ClickEvents(subMenu,menuList)}
+                        onClick={() => ClickEvents(subMenu, menuList)}
 
                       >
                         {menu

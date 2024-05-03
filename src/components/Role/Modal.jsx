@@ -260,13 +260,15 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
 
     useEffect(() => {
         let roleId = formDataEdit
+        console.log(roleId);
 
         const GetProfileDetails7 = async () => {
             try {
                 const response = await GetRoleDetails({ roleId: roleId })
-                const data = JSON.parse(response.result)
-                const datas = data.map((item) => item.sRoleName);
-                setName(datas[0])
+                const sRoleName = JSON.parse(response.result).Table[0].sRoleName
+                console.log(sRoleName,"data===================================");
+
+                setName(sRoleName)
             } catch (error) {
                 console.log("Get RoleDetails", error);
             }
@@ -614,7 +616,7 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
                                                             additions={additions}
                                                             setNewState={setNewState}
                                                             newState={newState}
-                                                            mode={mode} />
+                                                            mode1={mode1} />
                                                     </Box>
                                                 )}
                                             </div>
@@ -626,7 +628,7 @@ function Modal({ isOpen, handleNewClose, mode, resetChangesTrigger, formDataEdit
                                                             setNewState={setNewState}
                                                             exclutions={exclutions}
                                                             newState={newState}
-                                                            mode={mode} />
+                                                            mode1={mode1} />
                                                     </Box>
                                                 )}
                                             </div>
